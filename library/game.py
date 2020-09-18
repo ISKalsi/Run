@@ -15,16 +15,15 @@ d.set_caption("RUN")
 G = Ground("ground")
 
 
-def update(xOffset=0):
+def update():
     screen.fill(K.black)
-    G.update(xOffset)
+    G.update()
     G.sprites.draw(screen)
     d.update()
 
 
 while True:
     clock.tick(K.fps)
-
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -40,10 +39,10 @@ while True:
                 G.scale = 6 if fullscreen else 4
                 continue
 
-            if keys[K_RIGHT]:
-                G.scrollBG(update, False)
+            if keys[K_SPACE]:
+                G.start(update, 5)
 
-            if keys[K_LEFT]:
-                G.scrollBG(update, True)
+            if keys[K_x]:
+                G.stop(update)
 
-    update(G.scroll)
+    update()

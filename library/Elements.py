@@ -6,6 +6,7 @@ import sys
 from library.constants import K
 
 d = pygame.display
+c = pygame.time.Clock()
 
 
 def isQuit():
@@ -27,6 +28,7 @@ class Ground:
         g = self.array = self.generateGround(name, scale)
         self.sprites = pygame.sprite.Group(g)
         self.scroll = 0
+        self.momentum = 0
 
     @property
     def scale(self):
@@ -42,13 +44,15 @@ class Ground:
     def generateGround(self, name, scale=4):
         self.tile.scale(scale, True)
         gw = self.groundW = int(self.tile.rect.w * 0.8)
-        n = ceil(d.Info().current_w / gw) + 1
+        n = ceil(d.Info().current_w / gw) + 2
         print(d.Info().current_w)
         g = tuple([Sprites(name, 1) for _ in range(n)])
         [g[i].scale(scale, True) for i in range(len(g))]
         return g
 
-    def update(self, xOffset=0):
+    def update(self):
+        self.scroll += int(self.momentum)
+
         g = self.array
         t = self.tile.rect
         gw = self.groundW
@@ -56,27 +60,23 @@ class Ground:
         initialOffset = -t.w
         w = (len(g)) * gw
         for i in range(len(g)):
-            g[i].update(initialOffset + (gw * i + xOffset) % w, h - t.h)
+            g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h)
 
-    def scrollBG(self, update, left):
-        x = -1 if left else 1
-        pressed = True
-        momentum = 0
-        while pressed:
+    def start(self, update, cap):
+        while True:
+            c.tick(K.fps)
             isQuit()
 
-            self.scroll += int(x * momentum)
-            momentum += 0.2
+            self.momentum -= 0.1
+            update()
 
-            update(self.scroll)
+            if self.momentum <= -cap:
+                break
 
-            if pygame.event.get(KEYUP):
-                pressed = False
-
-        while momentum > 0:
+    def stop(self, update):
+        while self.momentum < 0:
+            c.tick(K.fps)
             isQuit()
 
-            momentum -= 0.5
-            self.scroll += int(x * momentum)
-
-            update(self.scroll)
+            self.momentum += 0.1
+            update()
