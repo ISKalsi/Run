@@ -36,8 +36,8 @@ while True:
                 sys.exit()
             if keys[K_LCTRL] and keys[K_f] and keys[K_LSUPER]:
                 fullscreen = not fullscreen
-                G.scale = 6 if fullscreen else 4
                 screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
+                G.scale = 6 if fullscreen else 4
                 continue
 
             if keys[K_RIGHT]:

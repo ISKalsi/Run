@@ -1,8 +1,9 @@
 from library.Sprites import Sprites
 import pygame
-from math import ceil
 from pygame.locals import *
+from math import ceil
 import sys
+from library.constants import K
 
 d = pygame.display
 
@@ -40,7 +41,8 @@ class Ground:
 
     def generateGround(self, name, scale=4):
         self.tile.scale(scale, True)
-        n = ceil(d.Info().current_w / self.groundW) + 1
+        gw = self.groundW = int(self.tile.rect.w * 0.8)
+        n = ceil(d.Info().current_w / gw) + 1
         print(d.Info().current_w)
         g = tuple([Sprites(name, 1) for _ in range(n)])
         [g[i].scale(scale, True) for i in range(len(g))]
@@ -49,11 +51,13 @@ class Ground:
     def update(self, xOffset=0):
         g = self.array
         t = self.tile.rect
-        w = self.groundW
-        initialOffset = w * 0.3
+        gw = self.groundW
+        h = d.Info().current_h
+        w = d.Info().current_w
+        initialOffset = -t.w
         for i in range(len(g)):
-            x = -initialOffset + w * i
-            g[i].update(x + xOffset, d.Info().current_h - t.h)
+            x = initialOffset + gw * i + xOffset
+            g[i].update(x, h - t.h)
 
     def scrollBG(self, update, left):
         x = -1 if left else 1
