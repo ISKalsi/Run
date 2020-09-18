@@ -53,11 +53,10 @@ class Ground:
         t = self.tile.rect
         gw = self.groundW
         h = d.Info().current_h
-        w = d.Info().current_w
         initialOffset = -t.w
+        w = (len(g)) * gw
         for i in range(len(g)):
-            x = initialOffset + gw * i + xOffset
-            g[i].update(x, h - t.h)
+            g[i].update(initialOffset + (gw * i + xOffset) % w, h - t.h)
 
     def scrollBG(self, update, left):
         x = -1 if left else 1
