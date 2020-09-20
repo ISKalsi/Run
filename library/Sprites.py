@@ -61,8 +61,9 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
             f = self.currentFrame = 0
             self.image = self.images[f]
             self.rect: pygame.Rect = self.cells[f]
-            self.originalWidth = self.rect.w
-            self.originalHeight = self.rect.h
+
+        self.originalWidth = self.rect.w
+        self.originalHeight = self.rect.h
         self.delay = 0
         self.dead = False
 

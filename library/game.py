@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 import sys
-from library.Elements import Ground
+from library.Elements import Ground, Player
 from library.constants import K
 
 pygame.init()
@@ -13,12 +13,15 @@ fullscreen = False
 d.set_caption("RUN")
 
 G = Ground("ground")
+P = Player("stickman_still", x=225, y=220)
 
 
 def update():
-    screen.fill(K.black)
+    screen.fill(K.white)
     G.update()
+    P.update()
     G.sprites.draw(screen)
+    P.draw(screen)
     d.update()
 
 
@@ -41,8 +44,9 @@ while True:
 
             if keys[K_SPACE]:
                 G.start(update, 5)
-
-            if keys[K_x]:
+            elif keys[K_x]:
                 G.stop(update)
+            elif keys[K_j]:
+                P.jump(update)
 
     update()
