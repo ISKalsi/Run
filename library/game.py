@@ -3,6 +3,9 @@ from pygame.locals import *
 import sys
 from library.Elements import Ground, Player
 from library.constants import K
+from library.Sprites import Sprites
+
+pointTo = Sprites.Offset
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -13,7 +16,7 @@ fullscreen = False
 d.set_caption("RUN")
 
 G = Ground("ground")
-P = Player("stickman_still", x=225, y=220)
+P = Player("stickman_still", x=250, y=420, offset=(0.5, 0.80))
 
 
 def update():

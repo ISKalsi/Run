@@ -37,7 +37,13 @@ class SpriteSheet:
 
 
 class Sprites(pygame.sprite.Sprite, SpriteSheet):
-    def __init__(self, name, frames=0, path=""):
+    class Offset:
+        center, \
+        topLeft, topMid, topRight, \
+        midLeft, midRight, \
+        bottomLeft, bottomMid, bottomRight = range(9)
+
+    def __init__(self, name, frames=0, path="", offset=Offset.topLeft):
         pygame.sprite.Sprite.__init__(self)
         if frames == 0:
             SpriteSheet.__init__(self, name, path)
@@ -66,6 +72,65 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
         self.originalHeight = self.rect.h
         self.delay = 0
         self.dead = False
+        self.offset = offset
+        self.offsetX = self.offsetY = 0
+        self.pointTo(offset)
+
+    @property
+    def x(self):
+        return self.rect.x - self.offsetX
+
+    @x.setter
+    def x(self, new):
+        self.rect.x = new + self.offsetX
+
+    @property
+    def y(self):
+        return self.rect.y - self.offsetY
+
+    @y.setter
+    def y(self, new):
+        self.rect.y = new + self.offsetY
+
+    def pointTo(self, offset):
+        w = self.rect.w
+        h = self.rect.h
+        x = y = 0
+        pointTo = Sprites.Offset
+        self.offset = offset
+        if offset == pointTo.topMid:
+            x = w // 2
+        elif offset == pointTo.topRight:
+            x = w
+        elif offset == pointTo.midLeft:
+            y = h // 2
+        elif offset == pointTo.center:
+            x = w // 2
+            y = h // 2
+        elif offset == pointTo.midRight:
+            y = h // 2
+            x = w
+        elif offset == pointTo.bottomLeft:
+            y = h
+        elif offset == pointTo.bottomMid:
+            y = h
+            x = w // 2
+        elif offset == pointTo.bottomRight:
+            x = w
+            y = h
+
+        # for manual offset:
+        # enter value between 0 and 1 for each X and Y as tuple
+        # That value will be the ratio of offset distance with width/height
+        # Eg:- bottomMid as a manual offset will look like (0.5, 1)
+        elif type(offset) is tuple:
+            x = int(w * offset[0])
+            y = int(h * offset[1])
+
+        a = self.offsetX = -x
+        b = self.offsetY = -y
+        self.rect.x += a
+        self.rect.y += b
 
     def scale(self, n=4, fromOriginal=False):
         if fromOriginal:
@@ -79,6 +144,10 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
 
         for i in range(self.frames):
             self.images[i] = pygame.transform.scale(self.images[i], (self.cells[i].w, self.cells[i].h))
+
+        self.image = self.images[self.currentFrame]
+        self.rect = self.cells[self.currentFrame]
+        self.pointTo(self.offset)
 
     def update(self, x=0, y=0, once=False, delay=0):
         if self.dead:
@@ -98,5 +167,5 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
 
         self.image = self.images[f]
         self.rect = self.cells[f]
-        self.rect.x = x
-        self.rect.y = y
+        self.x = x
+        self.y = y

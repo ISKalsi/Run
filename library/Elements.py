@@ -89,8 +89,8 @@ class Player:
         jump = "jump"
         slash = "slash"
 
-    def __init__(self, name, frames=0, path='', x=0, y=0, scale=4):
-        self.state = {"idle": Sprites(name, frames, path)}
+    def __init__(self, name, frames=0, path='', x=0, y=0, scale=4, offset=Sprites.Offset.topLeft):
+        self.state = {"idle": Sprites(name, frames, path, offset)}
         cs = self.currentState = Player.States.idle
         s = self.state[cs]
         s.rect.x = x
@@ -99,12 +99,20 @@ class Player:
         self.scale = scale
 
     @property
+    def x(self):
+        return self.state[self.currentState].x
+
+    @x.setter
+    def x(self, new):
+        self.state[self.currentState].x = new
+
+    @property
     def y(self):
-        return self.state[self.currentState].rect.y
+        return self.state[self.currentState].y
 
     @y.setter
     def y(self, new):
-        self.state[self.currentState].rect.y = new
+        self.state[self.currentState].y = new
 
     @property
     def scale(self):
@@ -120,7 +128,7 @@ class Player:
 
     def update(self):
         self.y -= int(self.momentum)
-        self.state[self.currentState].update(225, self.y, delay=3)
+        self.state[self.currentState].update(self.x, self.y, delay=3)
 
     def draw(self, screen):
         sprite = self.state[self.currentState]
