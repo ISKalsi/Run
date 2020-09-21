@@ -16,7 +16,8 @@ fullscreen = False
 d.set_caption("RUN")
 
 G = Ground("ground")
-P = Player("stickman_still", x=250, y=420, offset=(0.5, 0.80))
+# P = Player("stickman_still", x=int(K.width*0.33), y=(K.height*0.86), offset=(0.5, 0.824))
+P = Player("running animation", x=int(K.width*0.23), y=(K.height*0.86), scale=3, frames=12, offset=(0.5, 0.87))
 
 
 def update():
@@ -42,7 +43,13 @@ while True:
             if keys[K_LCTRL] and keys[K_f] and keys[K_LSUPER]:
                 fullscreen = not fullscreen
                 screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
-                G.scale = 6 if fullscreen else 4
+                G.scale = 6.6 if fullscreen else 4
+                # P.scale = 6 if fullscreen else 4
+                P.scale = 5 if fullscreen else 3
+                S = (d.Info().current_w, d.Info().current_h)
+                # P.x = int(S[0]*0.33)
+                P.x = int(S[0] * 0.23)
+                P.y = P.ground = int(S[1]*0.86)
                 continue
 
             if keys[K_SPACE]:
