@@ -17,11 +17,11 @@ d.set_caption("RUN")
 
 G = Ground("ground")
 # P = Player("stickman_still", x=int(K.width*0.33), y=(K.height*0.86), offset=(0.5, 0.824))
-P = Player("running animation", x=int(K.width*0.23), y=(K.height*0.86), scale=3, frames=12, offset=(0.5, 0.87))
+P = Player("running animation", x=int(K.width*0.23), y=(K.height*0.86), scale=3, frames=13, offset=(0.5, 0.87))
 
 
 def update():
-    screen.fill(K.white)
+    screen.fill(K.black)
     G.update()
     P.update()
     G.sprites.draw(screen)
