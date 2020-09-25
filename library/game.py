@@ -1,4 +1,5 @@
 import pygame
+import pygame.freetype
 from pygame.locals import *
 import sys
 from library.Elements import Ground, Player
@@ -20,43 +21,53 @@ G = Ground("ground")
 P = Player("running animation", x=int(K.width*0.23), y=(K.height*0.86), scale=3, frames=13, offset=(0.5, 0.87))
 
 
-def update():
-    screen.fill(K.black)
-    G.update()
-    P.update()
-    G.sprites.draw(screen)
-    P.draw(screen)
-    d.update()
+def toggleFullscreen():
+    global fullscreen, screen
+
+    fullscreen = not fullscreen
+    screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
+    G.scale = 6.6 if fullscreen else 4
+    # P.scale = 6 if fullscreen else 4
+    P.scale = 5 if fullscreen else 3
+    S = (d.Info().current_w, d.Info().current_h)
+    # P.x = int(S[0]*0.33)
+    P.x = int(S[0] * 0.23)
+    P.y = P.ground = int(S[1] * 0.86)
 
 
-while True:
-    clock.tick(K.fps)
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == KEYDOWN:
-            keys = pygame.key.get_pressed()
-            if keys[K_ESCAPE]:
+def gameLoop():
+    def update():
+        screen.fill(K.black)
+        G.update()
+        P.update()
+        G.sprites.draw(screen)
+        P.draw(screen)
+        d.flip()
+
+    while True:
+        clock.tick(K.fps)
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            if keys[K_LCTRL] and keys[K_f] and keys[K_LSUPER]:
-                fullscreen = not fullscreen
-                screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
-                G.scale = 6.6 if fullscreen else 4
-                # P.scale = 6 if fullscreen else 4
-                P.scale = 5 if fullscreen else 3
-                S = (d.Info().current_w, d.Info().current_h)
-                # P.x = int(S[0]*0.33)
-                P.x = int(S[0] * 0.23)
-                P.y = P.ground = int(S[1]*0.86)
-                continue
+            if event.type == KEYDOWN:
+                keys = pygame.key.get_pressed()
+                if keys[K_ESCAPE]:
+                    pygame.quit()
+                    sys.exit()
+                if keys[K_LCTRL] and keys[K_f] and keys[K_LSUPER]:
+                    toggleFullscreen()
+                    continue
 
-            if keys[K_SPACE]:
-                G.start(update, 5)
-            elif keys[K_x]:
-                G.stop(update)
-            elif keys[K_j]:
-                P.jump(update)
+                if keys[K_SPACE]:
+                    G.start(update, 5)
+                elif keys[K_x]:
+                    G.stop(update)
+                elif keys[K_j]:
+                    P.jump(update)
 
-    update()
+        update()
+
+
+gameLoop()
