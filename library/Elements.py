@@ -90,7 +90,8 @@ class Player:
         jump = "jump"
         slash = "slash"
 
-    def __init__(self, states, ground, x=0, y=0, scale=4):
+    def __init__(self, states, ground, x=0, y=0, scale=1):
+        self.Ground = ground  # Ground underneath the Player
         s = self.state = states
         self.currentState = Player.State.idle
 
@@ -104,7 +105,6 @@ class Player:
         self.scale = scale
 
         self.score = pygame.freetype.Font(K.scoreFont, 30*scale)
-        self.Ground = ground            # Ground underneath the Player
 
     @property
     def x(self):
@@ -128,6 +128,8 @@ class Player:
 
     @scale.setter
     def scale(self, new):
+        self.Ground.scale = 4
+
         self.score = pygame.freetype.Font(K.scoreFont, 30 * new)
         for sprite in self.state.values():
             sprite.scale(new, True)
@@ -136,10 +138,14 @@ class Player:
         self.currentState = state
 
     def update(self):
+        self.Ground.update()
+
         self.y -= int(self.momentum)
         self.state[self.currentState].update(self.x, self.y, delay=3)
 
     def draw(self, screen):
+        self.Ground.sprites.draw(screen)
+
         x = str(-int(self.Ground.scroll / 30))               # the score
         self.score.render_to(screen, (0, 0), x, K.white)     # score's corresponding font object
         sprite = self.state[self.currentState]

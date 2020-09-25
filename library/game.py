@@ -30,7 +30,6 @@ def toggleFullscreen():
 
     fullscreen = not fullscreen
     screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
-    G.scale = 4
     P.scale = 3 if fullscreen else 2
 
     S = (d.Info().current_w, d.Info().current_h)
@@ -45,9 +44,7 @@ def toggleFullscreen():
 def gameLoop():
     def update():
         screen.fill(K.black)
-        G.update()
         P.update()
-        G.sprites.draw(screen)
         P.draw(screen)
         d.flip()
 
@@ -68,9 +65,9 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    G.start(update, 5)
+                    P.Ground.start(update, 5)
                 elif keys[K_x]:
-                    G.stop(update)
+                    P.Ground.stop(update)
                 elif keys[K_j]:
                     P.jump(update)
 
