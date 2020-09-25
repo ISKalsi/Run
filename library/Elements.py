@@ -84,19 +84,21 @@ class Ground:
 
 
 class Player:
-    class States:
+    class State:
         idle = "idle"
         active = "run"
         jump = "jump"
         slash = "slash"
 
-    def __init__(self, name, frames=0, path='', x=0, y=0, scale=4, offset=Sprites.Offset.topLeft, *, ground):
-        self.state = {"idle": Sprites(name, frames, path, offset)}
-        cs = self.currentState = Player.States.idle
-        s = self.state[cs]
+    def __init__(self, states, ground, x=0, y=0, scale=4):
+        s = self.state = states
+        self.currentState = Player.State.idle
 
-        s.rect.x = x
-        self.groundY = s.rect.y = y     # for jump handling
+        for state in s.values():
+            state.rect.x = x
+            state.rect.y = y
+
+        self.groundY = y     # for jump handling
         self.momentum = 0
 
         self.scale = scale
@@ -145,6 +147,9 @@ class Player:
 
     def jump(self, update):
         self.momentum = 30
+        s = Player.State
+        self.currentState = s.jump
+        self.state[s.jump].currentFrame = 4
 
         while True:
             c.tick(K.fps)
@@ -153,5 +158,8 @@ class Player:
             if self.y >= self.groundY:
                 self.y = self.groundY
                 self.momentum = 0
+                self.currentState = s.idle
+                self.state[s.jump].currentFrame = 0
+                self.state[s.jump].delay = 0
                 update()
                 break

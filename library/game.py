@@ -16,9 +16,15 @@ screen = d.set_mode((K.width, K.height))
 fullscreen = False
 d.set_caption("RUN")
 
+states = {
+    Player.State.idle: Sprites("running animation", 13, offset=(0.5, 0.87)),
+    # Player.State.idle: Sprites("jump", 14, offset=(0.5, 0.87)),
+    Player.State.jump: Sprites("jump", 14, offset=(0.5, 0.87))
+}
+
 G = Ground("ground")
 # P = Player("stickman_still", x=int(K.width*0.33), y=(K.height*0.86), offset=(0.5, 0.824))
-P = Player("running animation", ground=G, x=int(K.width*0.23), y=int(K.height*0.86), scale=3, frames=13, offset=(0.5, 0.87))
+P = Player(states, G, x=int(K.width*0.23), y=int(K.height*0.86), scale=2)
 
 
 def toggleFullscreen():
@@ -28,7 +34,7 @@ def toggleFullscreen():
     screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
     G.scale = 6.6 if fullscreen else 4
     # P.scale = 6 if fullscreen else 4
-    P.scale = 5 if fullscreen else 3
+    P.scale = 5 if fullscreen else 2
     S = (d.Info().current_w, d.Info().current_h)
     # P.x = int(S[0]*0.33)
     P.x = int(S[0] * 0.23)
