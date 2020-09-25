@@ -1,5 +1,6 @@
 from library.Sprites import Sprites
 import pygame
+import pygame.freetype
 from pygame.locals import *
 from math import ceil
 import sys
@@ -89,14 +90,19 @@ class Player:
         jump = "jump"
         slash = "slash"
 
-    def __init__(self, name, frames=0, path='', x=0, y=0, scale=4, offset=Sprites.Offset.topLeft):
+    def __init__(self, name, frames=0, path='', x=0, y=0, scale=4, offset=Sprites.Offset.topLeft, *, ground):
         self.state = {"idle": Sprites(name, frames, path, offset)}
         cs = self.currentState = Player.States.idle
         s = self.state[cs]
+
         s.rect.x = x
-        self.ground = s.rect.y = y
+        self.groundY = s.rect.y = y     # for jump handling
         self.momentum = 0
+
         self.scale = scale
+
+        self.score = pygame.freetype.Font(K.scoreFont, 30*scale)
+        self.Ground = ground            # Ground underneath the Player
 
     @property
     def x(self):
@@ -120,6 +126,7 @@ class Player:
 
     @scale.setter
     def scale(self, new):
+        self.score = pygame.freetype.Font(K.scoreFont, 30 * new)
         for sprite in self.state.values():
             sprite.scale(new, True)
 
@@ -131,6 +138,8 @@ class Player:
         self.state[self.currentState].update(self.x, self.y, delay=3)
 
     def draw(self, screen):
+        x = str(-int(self.Ground.scroll / 30))               # the score
+        self.score.render_to(screen, (0, 0), x, K.white)     # score's corresponding font object
         sprite = self.state[self.currentState]
         screen.blit(sprite.image, sprite.rect)
 
@@ -141,8 +150,8 @@ class Player:
             c.tick(K.fps)
             self.momentum -= 2
             update()
-            if self.y >= self.ground:
-                self.y = self.ground
+            if self.y >= self.groundY:
+                self.y = self.groundY
                 self.momentum = 0
                 update()
                 break

@@ -11,3 +11,6 @@ class K:
     red = (255, 0, 0)
     blue = (0, 0, 255)
     transparent = (0, 0, 0, 0)
+
+    # fonts
+    scoreFont = "LcdSolid.ttf"
