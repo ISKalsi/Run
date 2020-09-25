@@ -92,6 +92,10 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
     def y(self, new):
         self.rect.y = new + self.offsetY
 
+    @property
+    def h(self):
+        return self.rect.h
+
     def pointTo(self, offset):
         w = self.rect.w
         h = self.rect.h
