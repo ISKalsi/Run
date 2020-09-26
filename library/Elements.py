@@ -25,7 +25,7 @@ class Ground:
         self.name = name
         self.tile = Sprites(name, 1)
         self.groundW = int(self.tile.rect.w * 0.8)
-        self.scale = scale
+        self.s = scale
         g = self.array = self.generateGround(name, scale)
         self.sprites = pygame.sprite.Group(g)
         self.scroll = 0
@@ -33,7 +33,7 @@ class Ground:
 
     @property
     def scale(self):
-        pass
+        return self.s
 
     @scale.setter
     def scale(self, new):
@@ -63,7 +63,9 @@ class Ground:
         for i in range(len(g)):
             g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h)
 
-    def start(self, update, cap):
+    def start(self, update, cap, player):
+        player.currentState = Player.State.active
+
         while True:
             c.tick(K.fps)
             isQuit()
@@ -74,13 +76,15 @@ class Ground:
             if self.momentum <= -cap:
                 break
 
-    def stop(self, update):
+    def stop(self, update, player):
         while self.momentum < 0:
             c.tick(K.fps)
             isQuit()
 
             self.momentum += 0.1
             update()
+
+        player.currentState = Player.State.idle
 
 
 class Player:
@@ -102,7 +106,7 @@ class Player:
         self.groundY = y     # for jump handling
         self.momentum = 0
 
-        self.scale = scale
+        self.s = self.scale = scale
 
         self.score = pygame.freetype.Font(K.scoreFont, 30*scale)
 
@@ -124,7 +128,7 @@ class Player:
 
     @property
     def scale(self):
-        pass
+        return self.s
 
     @scale.setter
     def scale(self, new):

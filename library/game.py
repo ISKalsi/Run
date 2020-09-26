@@ -16,9 +16,11 @@ screen = d.set_mode((K.width, K.height))
 fullscreen = False
 d.set_caption("RUN")
 
+playerOffset = (0.5, 0.87)
 states = {
-    Player.State.idle: Sprites("running animation", 13, offset=(0.5, 0.87)),
-    Player.State.jump: Sprites("jump", 14, offset=(0.5, 0.87))
+    Player.State.active: Sprites("running animation", 13, offset=playerOffset),
+    Player.State.jump: Sprites("jump", 14, offset=playerOffset),
+    Player.State.idle: Sprites("idle", 16, offset=playerOffset)
 }
 
 G = Ground("ground")
@@ -65,9 +67,9 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    P.Ground.start(update, 5)
+                    P.Ground.start(update, 5, P)
                 elif keys[K_x]:
-                    P.Ground.stop(update)
+                    P.Ground.stop(update, P)
                 elif keys[K_j]:
                     P.jump(update)
 
