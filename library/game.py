@@ -38,8 +38,9 @@ def toggleFullscreen():
     fullscreen = not fullscreen
     screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
 
-    for P in players:
-        P.scale = 3 if fullscreen else 2
+    scale = 3 if fullscreen else 2
+    for player in players:
+        player.scale = scale
 
 
 def gameLoop():
@@ -67,9 +68,9 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    players[0].Ground.start(update, 5, players[0])
+                    players[0].Ground.start(update, 5)
                 elif keys[K_x]:
-                    players[0].Ground.stop(update, players[0])
+                    players[0].Ground.stop(update)
                 elif keys[K_j]:
                     players[0].jump(update)
 

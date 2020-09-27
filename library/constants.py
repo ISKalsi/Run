@@ -1,7 +1,7 @@
 class K:
     # screen
     width = 1200
-    height = 500
+    height = 800
     fps = 60
 
     # colors

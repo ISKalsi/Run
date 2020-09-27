@@ -27,6 +27,8 @@ class Ground:
         self.name = name
         self.tile = Sprites(name, 1)
 
+        self.Player = None                        # initialize with player when using this class
+
         Ground.totalGrounds += 1
         i = self.id = Ground.totalGrounds - 1
 
@@ -73,8 +75,8 @@ class Ground:
         for i in range(len(g)):
             g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h + self.baseY)
 
-    def start(self, update, cap, player):
-        player.currentState = Player.State.active
+    def start(self, update, cap):
+        self.Player.currentState = Player.State.active
 
         while True:
             c.tick(K.fps)
@@ -86,7 +88,7 @@ class Ground:
             if self.momentum <= -cap:
                 break
 
-    def stop(self, update, player):
+    def stop(self, update):
         while self.momentum < 0:
             c.tick(K.fps)
             isQuit()
@@ -94,7 +96,7 @@ class Ground:
             self.momentum += 0.1
             update()
 
-        player.currentState = Player.State.idle
+        self.Player.currentState = Player.State.idle
 
 
 class Player:
@@ -114,7 +116,8 @@ class Player:
         self.groundY: int  # for jump handling
         self.momentum = 0
 
-        self.Ground = ground  # Ground underneath the Player
+        G = self.Ground = ground  # Ground underneath the Player
+        G.Player = self
 
         self.state = states
         self.currentState = Player.State.idle
@@ -156,10 +159,12 @@ class Player:
         baseY = self.Ground.baseY
         groundH = self.Ground.tile.h
 
+        x = int(S[0] * 0.10 * (self.id+1))
+        y = self.groundY = S[1] - int(groundH * 0.8) + baseY
         for sprite in self.state.values():
             sprite.scale(new, True)
-            sprite.x = int(S[0] * 0.10 * (self.id+1))
-            sprite.y = self.groundY = S[1] - int(groundH * 0.8) + baseY
+            sprite.x = x
+            sprite.y = y
 
     # methods
     def update(self):
