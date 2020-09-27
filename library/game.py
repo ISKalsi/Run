@@ -17,14 +17,19 @@ fullscreen = False
 d.set_caption("RUN")
 
 playerOffset = (0.5, 0.87)
-states = {
-    Player.State.active: Sprites("running animation", 13, offset=playerOffset),
-    Player.State.jump: Sprites("jump", 14, offset=playerOffset),
-    Player.State.idle: Sprites("idle", 16, offset=playerOffset)
-}
+players = []
 
-G = Ground("ground")
-P = Player(states, G, x=int(K.width*0.23), y=K.height - int(G.tile.h * 0.8), scale=2)
+for _ in range(4):
+    states = {
+        Player.State.active: Sprites("running animation", 13, offset=playerOffset),
+        Player.State.jump: Sprites("jump", 14, offset=playerOffset),
+        Player.State.idle: Sprites("idle", 16, offset=playerOffset)
+    }
+
+    P = Player(states, Ground("ground"), screen=(K.width, K.height), scale=2)
+    players.append(P)
+
+N = len(players)
 
 
 def toggleFullscreen():
@@ -32,22 +37,17 @@ def toggleFullscreen():
 
     fullscreen = not fullscreen
     screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
-    P.scale = 3 if fullscreen else 2
 
-    S = (d.Info().current_w, d.Info().current_h)
-
-    x = int(S[0] * 0.23)
-    y = P.groundY = S[1] - int(P.Ground.tile.h * 0.8)
-    for state in P.state.values():
-        state.x = x
-        state.y = y
+    for P in players:
+        P.scale = 3 if fullscreen else 2
 
 
 def gameLoop():
     def update():
         screen.fill(K.black)
-        P.update()
-        P.draw(screen)
+        for i in range(N):
+            players[N-i-1].update()
+            players[N-i-1].draw(screen)
         d.flip()
 
     while True:
@@ -67,11 +67,11 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    P.Ground.start(update, 5, P)
+                    players[0].Ground.start(update, 5, players[0])
                 elif keys[K_x]:
-                    P.Ground.stop(update, P)
+                    players[0].Ground.stop(update, players[0])
                 elif keys[K_j]:
-                    P.jump(update)
+                    players[0].jump(update)
 
         update()
 

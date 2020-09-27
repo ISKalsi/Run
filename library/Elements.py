@@ -21,13 +21,22 @@ def isQuit():
 
 
 class Ground:
+    totalGrounds = 0
+
     def __init__(self, name, scale=4):
         self.name = name
         self.tile = Sprites(name, 1)
+
+        Ground.totalGrounds += 1
+        i = self.id = Ground.totalGrounds - 1
+
         self.groundW = int(self.tile.rect.w * 0.8)
+        self.baseY = - int(self.tile.rect.h * i)
+
         self.s = scale
         g = self.array = self.generateGround(name, scale)
         self.sprites = pygame.sprite.Group(g)
+
         self.scroll = 0
         self.momentum = 0
 
@@ -37,18 +46,19 @@ class Ground:
 
     @scale.setter
     def scale(self, new):
-        self.tile.scale(new, True)
-        self.groundW = int(self.tile.rect.w * 0.8)
         g = self.array = self.generateGround(self.name, new)
         self.sprites = pygame.sprite.Group([tile for tile in g])
 
     def generateGround(self, name, scale=4):
         self.tile.scale(scale, True)
+
         gw = self.groundW = int(self.tile.rect.w * 0.8)
+        self.baseY = - int(self.tile.rect.h * 0.9 * self.id)
+
         n = ceil(d.Info().current_w / gw) + 2
-        print(d.Info().current_h)
         g = tuple([Sprites(name, 1) for _ in range(n)])
         [g[i].scale(scale, True) for i in range(len(g))]
+
         return g
 
     def update(self):
@@ -61,7 +71,7 @@ class Ground:
         initialOffset = -t.w
         w = (len(g)) * gw
         for i in range(len(g)):
-            g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h)
+            g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h + self.baseY)
 
     def start(self, update, cap, player):
         player.currentState = Player.State.active
@@ -88,28 +98,33 @@ class Ground:
 
 
 class Player:
+    # Static Stuff
     class State:
         idle = "idle"
         active = "run"
         jump = "jump"
         slash = "slash"
 
-    def __init__(self, states, ground, x=0, y=0, scale=1):
+    totalPlayers = 0
+
+    # Constructor
+    def __init__(self, states, ground, screen=(0, 0), scale=1):
+        Player.totalPlayers += 1
+        self.id = Player.totalPlayers - 1
+        self.groundY: int  # for jump handling
+        self.momentum = 0
+
         self.Ground = ground  # Ground underneath the Player
-        s = self.state = states
+
+        self.state = states
         self.currentState = Player.State.idle
 
-        for state in s.values():
-            state.rect.x = x
-            state.rect.y = y
-
-        self.groundY = y     # for jump handling
-        self.momentum = 0
+        self.score = pygame.freetype.Font(K.scoreFont, 30 * scale)
+        self.scoreX = screen[0]/4 * self.id
 
         self.s = self.scale = scale
 
-        self.score = pygame.freetype.Font(K.scoreFont, 30*scale)
-
+    # getters&setters + decorated properties
     @property
     def x(self):
         return self.state[self.currentState].x
@@ -132,15 +147,21 @@ class Player:
 
     @scale.setter
     def scale(self, new):
-        self.Ground.scale = 4
+        S = (d.Info().current_w, d.Info().current_h)
 
         self.score = pygame.freetype.Font(K.scoreFont, 30 * new)
+        self.scoreX = S[0] / 4 * self.id
+
+        self.Ground.scale = 4
+        baseY = self.Ground.baseY
+        groundH = self.Ground.tile.h
+
         for sprite in self.state.values():
             sprite.scale(new, True)
+            sprite.x = int(S[0] * 0.10 * (self.id+1))
+            sprite.y = self.groundY = S[1] - int(groundH * 0.8) + baseY
 
-    def changeState(self, state):
-        self.currentState = state
-
+    # methods
     def update(self):
         self.Ground.update()
 
@@ -151,7 +172,7 @@ class Player:
         self.Ground.sprites.draw(screen)
 
         x = str(-int(self.Ground.scroll / 30))               # the score
-        self.score.render_to(screen, (0, 0), x, K.white)     # score's corresponding font object
+        self.score.render_to(screen, (self.scoreX, 0), x, K.white)     # score's corresponding font object
         sprite = self.state[self.currentState]
         screen.blit(sprite.image, sprite.rect)
 
