@@ -184,6 +184,7 @@ class Player:
     def jump(self, update):
         self.momentum = 30
         s = Player.State
+        prevState = self.currentState
         self.currentState = s.jump
         self.state[s.jump].currentFrame = 4
 
@@ -194,7 +195,7 @@ class Player:
             if self.y >= self.groundY:
                 self.y = self.groundY
                 self.momentum = 0
-                self.currentState = s.idle
+                self.currentState = prevState
                 self.state[s.jump].currentFrame = 0
                 self.state[s.jump].delay = 0
                 update()
