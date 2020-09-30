@@ -52,6 +52,13 @@ def addPlayer(c=None):
         return P.id
 
 
+def delPlayer(c):
+    for i in range(N):
+        if f'{i}' not in c and i != x:
+            del players[i]
+    print(players)
+
+
 def toggleFullscreen():
     global fullscreen, screen
 
@@ -67,16 +74,19 @@ def gameLoop():
     def update():
         c = Client.clientList
         screen.fill(K.black)
-        if c["count"] != N:
+        if c["count"] > N:
             addPlayer(c)
+        elif c["count"] < N:
+            delPlayer(c)
 
         for i in range(c["count"]):
-            if i != x:
+            if i != x and i in players:
                 setattr(players[i], "current", c[f'{i}'][1])
 
         for i in range(N):
-            players[N-i-1].update()
-            players[N-i-1].draw(screen)
+            if N-i-1 in players:
+                players[N-i-1].update()
+                players[N-i-1].draw(screen)
         d.flip()
 
     while True:

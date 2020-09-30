@@ -5,7 +5,8 @@ import json
 HEADER = 1
 FORMAT = 'utf-8'
 PORT = 7777
-SERVER = socket.gethostbyname(socket.gethostname())
+# SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = '192.168.29.32'
 ADDR = (SERVER, PORT)
 
 clientList = {"count": 0, "operation": 0}
@@ -52,6 +53,8 @@ def handleClient(conn, addr):
         except socket.error as e:
             print("(Server Side) ", e)
             break
+        except json.decoder.JSONDecodeError as e:
+            print("(Server Side) ", e)
 
     # noinspection PyTypeChecker
     del clientList[i]

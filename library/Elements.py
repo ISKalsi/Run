@@ -31,7 +31,7 @@ class Ground:
         self.Player = None                        # initialize with player when using this class
 
         Ground.totalGrounds += 1
-        i = self.id = Ground.totalGrounds - 1
+        i = self.ID = Ground.totalGrounds - 1
 
         self.groundW = int(self.tile.rect.w * 0.8)
         self.baseY = - int(self.tile.rect.h * i)
@@ -51,6 +51,15 @@ class Ground:
     def scale(self, new):
         g = self.array = self.generateGround(self.name, new)
         self.sprites = pygame.sprite.Group([tile for tile in g])
+
+    @property
+    def id(self):
+        return self.ID
+
+    @id.setter
+    def id(self, new):
+        self.ID = new
+        self.baseY = - int(self.tile.rect.h * new)
 
     def generateGround(self, name, scale=4):
         self.tile.scale(scale, True)
@@ -113,6 +122,7 @@ class Player(Client):
 
         G = self.Ground = ground  # Ground underneath the Player
         G.Player = self
+        G.id = self.id
 
         self.state = states
 
