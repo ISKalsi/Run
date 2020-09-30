@@ -37,7 +37,6 @@ def addPlayer(c=None):
     if c is not None:
         for i in range(c["count"]):
             print(N, c["count"])
-            print(c[f'{i}'])
             if i in players:
                 continue
 
@@ -54,7 +53,7 @@ def addPlayer(c=None):
 
 def delPlayer(c):
     for i in range(N):
-        if f'{i}' not in c and i != x:
+        if f'{i}' not in c and i in players:
             del players[i]
     print(players)
 
@@ -80,7 +79,7 @@ def gameLoop():
             delPlayer(c)
 
         for i in range(c["count"]):
-            if i != x and i in players:
+            if i != x and i in players and f'{i}' in c:
                 setattr(players[i], "current", c[f'{i}'][1])
 
         for i in range(N):
