@@ -1,7 +1,6 @@
 import socket
 import threading
 import json
-from types import SimpleNamespace
 
 HEADER = 1
 FORMAT = 'utf-8'
@@ -37,12 +36,14 @@ def handleClient(conn, addr):
     send(conn)
 
     while True:
-        msg = conn.recv(1024)
-        print(msg)
+        try:
+            msg = conn.recv(1024)
+        except socket.error as e:
+            print(e)
+            break
+
         if msg:
-            print(msg)
             player = json.loads(msg.decode(FORMAT))
-            print(player)
             if player[1] == State.exit or player[1] == State.disconnected:
                 clientList["count"] -= 1
                 break

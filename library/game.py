@@ -35,10 +35,10 @@ def addPlayer(c=None):
     global N
 
     if c is not None:
-        for i in range(N, c["count"]):
+        for i in range(c["count"]):
             print(N, c["count"])
             print(c[f'{i}'])
-            if c[f'{i}'][1]:
+            if i in players:
                 continue
 
             P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2, clientList=c, ID=i)
@@ -46,6 +46,7 @@ def addPlayer(c=None):
             N += 1
     else:
         P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2)
+        print(P.id)
         players[P.id] = P
         N += 1
         return P.id

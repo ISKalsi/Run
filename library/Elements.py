@@ -104,8 +104,9 @@ class Player(Client):
     # Constructor
     def __init__(self, states, ground, screen=(0, 0), scale=1, clientList=None, ID=None):
         Client.__init__(self, self, clientList, ID)
-        if self.isClient:
-            self.info = (self.id, self.currentState)
+
+        while self.id is None:
+            pass
 
         self.groundY: int  # for jump handling
         self.momentum = 0
