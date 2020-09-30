@@ -47,11 +47,9 @@ def handleServer(client):
 
     try:
         clientList = sock.recv(1024).decode(client.FORMAT)
-        C = Client.clientList = json.loads(clientList)
-        ID = client.id = C["id"][-1]
+        C, ID = Client.clientList, client.id = json.loads(clientList)
 
         if ID == -1:
-            C["id"].pop()
             print("Game full. Exiting...")
             sock.close()
             return
@@ -74,7 +72,7 @@ def handleServer(client):
             else:
                 clientList = sock.recv(1024).decode(client.FORMAT)
                 if clientList:
-                    Client.clientList = json.loads(clientList)
+                    Client.clientList = json.loads(clientList)[0]
     except socket.error as e:
         print("(Client Side) ", e)
 

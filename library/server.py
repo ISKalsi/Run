@@ -11,7 +11,8 @@ ADDR = (SERVER, PORT)
 
 clientList = {"count": 0, "id": [], "players": {}}
 disconnected = {}
-available = [i for i in range(4)]
+available = ([i for i in range(4)])
+available.reverse()
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
@@ -22,12 +23,11 @@ class State:
     full, disconnected, exit = range(-3, 0)
 
 
-def send(conn):
-    jsonObj = json.dumps(clientList)
-    conn.send(jsonObj.encode(FORMAT))
-
-
 def handleClient(conn, addr):
+    def send(*args):
+        jsonObj = json.dumps((clientList, *args))
+        conn.send(jsonObj.encode(FORMAT))
+
     ID: int = -1
     ip = addr[0]
 
@@ -38,18 +38,18 @@ def handleClient(conn, addr):
     elif available:
         print(f"[NEW CONNECTION] {addr}")
 
-        ID = available[0]
+        ID = available.pop()
         # noinspection PyTypeChecker
         clientList["id"].append(ID)
+        clientList["id"].sort(reverse=True)
         clientList["count"] += 1
     else:
-        clientList["id"].append(ID)
-        send(conn)
+        send(ID)
         conn.close()
         return
 
     clientList["players"][ID] = State.idle
-    send(conn)
+    send(ID)
 
     while True:
         # noinspection PyBroadException
@@ -64,8 +64,10 @@ def handleClient(conn, addr):
                     del clientList["players"][ID]
                     clientList["id"].remove(ID)
                     available.append(ID)
+                    clientList["id"].sort(reverse=True)
                     clientList["count"] -= 1
 
+                    send()
                     conn.close()
                     print("[CONNECTION CLOSED]\n")
                     return
@@ -74,15 +76,15 @@ def handleClient(conn, addr):
                 # noinspection PyTypeChecker
                 clientList["players"][ID] = current
 
-            send(conn)
+            send()
 
         except socket.error as e:
             print("(Server Side) ", e)
             break
         except json.decoder.JSONDecodeError as e:
             print("(Server Side) ", e)
-        except:
-            print("(Server Side) some other shit")
+        # except:
+        #     print("(Server Side) some other shit")
 
     disconnected[ip] = ID
     print("[Player ID: ", ID, "] Disconnect.", sep='')

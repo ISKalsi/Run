@@ -34,9 +34,9 @@ def generateStates():
 def addPlayer(c=None):
     global N
 
-    if c is not None:
-        for i in range(c["count"]):
-            if i in players:
+    if c:
+        for i in c["id"]:
+            if i == x:
                 continue
 
             P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2, clientList=c, ID=i)
@@ -54,11 +54,10 @@ def delPlayer(c):
     global N
     k = 0
     for i in range(N):
-        if f'{i}' not in c and i in players:
+        if i not in c["id"] and i in players:
             del players[i]
             k += 1
     N -= k
-    print(players)
 
 
 def toggleFullscreen():
@@ -81,14 +80,11 @@ def gameLoop():
         elif c["count"] < N:
             delPlayer(c)
 
-        for i in range(c["count"]):
-            if i != x and i in players and f'{i}' in c["players"]:
-                setattr(players[i], "current", c["players"][f'{i}'])
-
-        for i in range(N):
-            if N-i-1 in players:
-                players[N-i-1].update()
-                players[N-i-1].draw(screen)
+        for i in c["id"]:
+            if i != x:
+                setattr(players[i], "currentState", c["players"][f'{i}'])
+            players[i].update()
+            players[i].draw(screen)
         d.flip()
 
     while True:
