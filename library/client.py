@@ -53,24 +53,33 @@ class Client:
 def handleServer(client):
     sock = client.sock
 
-    clientList = sock.recv(2048).decode(client.FORMAT)
-    Client.clientList = json.loads(clientList)
+    try:
+        clientList = sock.recv(2048).decode(client.FORMAT)
+        Client.clientList = json.loads(clientList)
+    except socket.error as e:
+        print("Arre? Starting mei hi error?! ", e)
 
     client.id = Client.clientList["count"] - 1
     info = (client.id, client.current, True)
 
-    while True:
-        jsonObj = json.dumps(info)
-        sock.send(jsonObj.encode(Client.FORMAT))
+    try:
+        while True:
+            jsonObj = json.dumps(info)
+            sock.send(jsonObj.encode(Client.FORMAT))
 
-        if client.current == client.State.disconnected or client.current == client.State.exit or not pygame.display.get_active():
-            break
-        else:
-            clientList = sock.recv(2048).decode(client.FORMAT)
-            if clientList:
-                Client.clientList = json.loads(clientList)
+            if client.current == client.State.disconnected or client.current == client.State.exit or not pygame.display.get_active():
+                info = (client.id, client.currentState, True)
+                jsonObj = json.dumps(info)
+                sock.send(jsonObj.encode(Client.FORMAT))
+                break
+            else:
+                clientList = sock.recv(2048).decode(client.FORMAT)
+                if clientList:
+                    Client.clientList = json.loads(clientList)
 
-        info = (client.id, client.currentState, True)
+            info = (client.id, client.currentState, True)
+    except socket.error as e:
+        print("(Client Side) ", e)
 
     print("Disconnected Client: ", client.id)
     sock.close()

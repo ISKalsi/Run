@@ -38,25 +38,29 @@ def handleClient(conn, addr):
     while True:
         try:
             msg = conn.recv(1024)
+
+            if msg:
+                player = json.loads(msg.decode(FORMAT))
+                if player[1] == State.exit or player[1] == State.disconnected:
+                    break
+                elif player[1] == State.new:
+                    continue
+
+                # noinspection PyTypeChecker
+                clientList[player[0]] = (player[0], player[1], player[2])
+
+            send(conn)
+
         except socket.error as e:
-            print(e)
+            print("(Server Side) ", e)
             break
 
-        if msg:
-            player = json.loads(msg.decode(FORMAT))
-            if player[1] == State.exit or player[1] == State.disconnected:
-                clientList["count"] -= 1
-                break
-            elif player[1] == State.new:
-                continue
-
-            # noinspection PyTypeChecker
-            clientList[player[0]] = (player[0], player[1], player[2])
-
-        send(conn)
+    # noinspection PyTypeChecker
+    del clientList[i]
+    clientList["count"] -= 1
 
     conn.close()
-    print("[CONNECTION CLOSED]")
+    print("[CONNECTION CLOSED]\n")
 
 
 def start():
