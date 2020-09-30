@@ -5,6 +5,7 @@ from pygame.locals import *
 from math import ceil
 import sys
 from library.constants import K
+from library.client import Client
 
 d = pygame.display
 c = pygame.time.Clock()
@@ -99,20 +100,13 @@ class Ground:
         self.Player.currentState = Player.State.idle
 
 
-class Player:
-    # Static Stuff
-    class State:
-        idle = "idle"
-        active = "run"
-        jump = "jump"
-        slash = "slash"
-
-    totalPlayers = 0
-
+class Player(Client):
     # Constructor
-    def __init__(self, states, ground, screen=(0, 0), scale=1):
-        Player.totalPlayers += 1
-        self.id = Player.totalPlayers - 1
+    def __init__(self, states, ground, screen=(0, 0), scale=1, clientList=None, ID=None):
+        Client.__init__(self, self, clientList, ID)
+        if self.isClient:
+            self.info = (self.id, self.currentState)
+
         self.groundY: int  # for jump handling
         self.momentum = 0
 
@@ -120,7 +114,6 @@ class Player:
         G.Player = self
 
         self.state = states
-        self.currentState = Player.State.idle
 
         self.score = pygame.freetype.Font(K.scoreFont, 30 * scale)
         self.scoreX = screen[0]/4 * self.id
@@ -150,6 +143,7 @@ class Player:
 
     @scale.setter
     def scale(self, new):
+        self.s = new
         S = (d.Info().current_w, d.Info().current_h)
 
         self.score = pygame.freetype.Font(K.scoreFont, 30 * new)

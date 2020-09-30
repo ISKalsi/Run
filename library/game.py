@@ -5,7 +5,7 @@ import sys
 from library.Elements import Ground, Player
 from library.constants import K
 from library.Sprites import Sprites
-
+from library.client import Client
 pointTo = Sprites.Offset
 
 pygame.init()
@@ -17,19 +17,38 @@ fullscreen = False
 d.set_caption("RUN")
 
 playerOffset = (0.5, 0.87)
-players = []
+players = {}
+N = 0
 
-for _ in range(4):
+
+def generateStates():
     states = {
         Player.State.active: Sprites("running animation", 13, offset=playerOffset),
         Player.State.jump: Sprites("jump", 14, offset=playerOffset),
         Player.State.idle: Sprites("idle", 16, offset=playerOffset)
     }
 
-    P = Player(states, Ground("ground"), screen=(K.width, K.height), scale=2)
-    players.append(P)
+    return states
 
-N = len(players)
+
+def addPlayer(c=None):
+    global N
+
+    if c is not None:
+        for i in range(N, c["count"]):
+            print(N, c["count"])
+            print(c[f'{i}'])
+            if c[f'{i}'][1]:
+                continue
+
+            P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2, clientList=c, ID=i)
+            players[i] = P
+            N += 1
+    else:
+        P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2)
+        players[P.id] = P
+        N += 1
+        return P.id
 
 
 def toggleFullscreen():
@@ -45,7 +64,14 @@ def toggleFullscreen():
 
 def gameLoop():
     def update():
+        c = Client.clientList
         screen.fill(K.black)
+        if c["count"] != N:
+            addPlayer(c)
+
+        for i in range(c["count"]):
+            setattr(players[i], "current", c[f'{i}'][1])
+
         for i in range(N):
             players[N-i-1].update()
             players[N-i-1].draw(screen)
@@ -68,13 +94,14 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    players[0].Ground.start(update, 5)
+                    players[x].Ground.start(update, 5)
                 elif keys[K_x]:
-                    players[0].Ground.stop(update)
+                    players[x].Ground.stop(update)
                 elif keys[K_j]:
-                    players[0].jump(update)
+                    players[x].jump(update)
 
         update()
 
 
+x = addPlayer()
 gameLoop()
