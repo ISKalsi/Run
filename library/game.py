@@ -36,7 +36,6 @@ def addPlayer(c=None):
 
     if c is not None:
         for i in range(c["count"]):
-            print(N, c["count"])
             if i in players:
                 continue
 
@@ -52,9 +51,13 @@ def addPlayer(c=None):
 
 
 def delPlayer(c):
+    global N
+    k = 0
     for i in range(N):
         if f'{i}' not in c and i in players:
             del players[i]
+            k += 1
+    N -= k
     print(players)
 
 
@@ -79,8 +82,8 @@ def gameLoop():
             delPlayer(c)
 
         for i in range(c["count"]):
-            if i != x and i in players and f'{i}' in c:
-                setattr(players[i], "current", c[f'{i}'][1])
+            if i != x and i in players and f'{i}' in c["players"]:
+                setattr(players[i], "current", c["players"][f'{i}'])
 
         for i in range(N):
             if N-i-1 in players:
@@ -100,7 +103,12 @@ def gameLoop():
                 if keys[K_ESCAPE]:
                     pygame.quit()
                     sys.exit()
-                if keys[K_LCTRL] and keys[K_f] and keys[K_LSUPER]:
+                if keys[K_q]:
+                    players[x].currentState = Client.State.exit
+                    pygame.quit()
+                    sys.exit()
+
+                if keys[K_LCTRL] and keys[K_f] and (keys[K_LSUPER] or keys[K_LSHIFT]):
                     toggleFullscreen()
                     continue
 

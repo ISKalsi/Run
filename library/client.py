@@ -33,20 +33,12 @@ class Client:
             Client.clientList = clientList
             self.id = ID
 
-        self.current = self.State.idle
-
-    @property
-    def currentState(self):
-        return self.current
-
-    @currentState.setter
-    def currentState(self, new):
-        self.current = new
+        self.currentState = self.State.idle
 
     def __del__(self):
         self.currentState = self.State.disconnected
         if self.isClient:
-            del Client.clientList[f"{self.id}"]
+            del Client.clientList["players"][f"{self.id}"]
             Client.clientList["count"] -= 1
 
 
@@ -54,30 +46,35 @@ def handleServer(client):
     sock = client.sock
 
     try:
-        clientList = sock.recv(2048).decode(client.FORMAT)
-        Client.clientList = json.loads(clientList)
+        clientList = sock.recv(1024).decode(client.FORMAT)
+        C = Client.clientList = json.loads(clientList)
+        ID = client.id = C["id"][-1]
+
+        if ID == -1:
+            C["id"].pop()
+            print("Game full. Exiting...")
+            sock.close()
+            return
+
     except socket.error as e:
         print("Arre? Starting mei hi error?! ", e)
 
-    client.id = Client.clientList["count"] - 1
-    info = (client.id, client.current, True)
-
     try:
         while True:
-            jsonObj = json.dumps(info)
+            jsonObj = json.dumps(client.currentState)
             sock.send(jsonObj.encode(Client.FORMAT))
 
-            if client.current == client.State.disconnected or client.current == client.State.exit or not pygame.display.get_active():
-                info = (client.id, client.currentState, True)
-                jsonObj = json.dumps(info)
+            if not pygame.display.get_active():
+                client.currentState = client.State.disconnected
+
+            if client.currentState == client.State.disconnected or client.currentState == client.State.exit:
+                jsonObj = json.dumps(client.currentState)
                 sock.send(jsonObj.encode(Client.FORMAT))
                 break
             else:
                 clientList = sock.recv(1024).decode(client.FORMAT)
                 if clientList:
                     Client.clientList = json.loads(clientList)
-
-            info = (client.id, client.currentState, True)
     except socket.error as e:
         print("(Client Side) ", e)
 
