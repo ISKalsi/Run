@@ -71,7 +71,8 @@ def gameLoop():
             addPlayer(c)
 
         for i in range(c["count"]):
-            setattr(players[i], "current", c[f'{i}'][1])
+            if i != x:
+                setattr(players[i], "current", c[f'{i}'][1])
 
         for i in range(N):
             players[N-i-1].update()

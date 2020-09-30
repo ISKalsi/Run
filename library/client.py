@@ -13,7 +13,7 @@ class Client:
     clientList = {}
 
     class State:
-        new, idle, active, jump = range(4)
+        idle, active, jump = range(3)
         exit = -1
         disconnected = -2
 
@@ -73,7 +73,7 @@ def handleServer(client):
                 sock.send(jsonObj.encode(Client.FORMAT))
                 break
             else:
-                clientList = sock.recv(2048).decode(client.FORMAT)
+                clientList = sock.recv(1024).decode(client.FORMAT)
                 if clientList:
                     Client.clientList = json.loads(clientList)
 

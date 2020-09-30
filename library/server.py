@@ -15,7 +15,7 @@ server.bind(ADDR)
 
 
 class State:
-    new, idle, active, jump = range(4)
+    idle, active, jump = range(3)
     exit = -1
     disconnected = -2
 
@@ -43,8 +43,6 @@ def handleClient(conn, addr):
                 player = json.loads(msg.decode(FORMAT))
                 if player[1] == State.exit or player[1] == State.disconnected:
                     break
-                elif player[1] == State.new:
-                    continue
 
                 # noinspection PyTypeChecker
                 clientList[player[0]] = (player[0], player[1], player[2])
