@@ -69,8 +69,8 @@ def toggleFullscreen():
     screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
 
     scale = 3 if fullscreen else 2
-    for player in players:
-        player.scale = scale
+    for i in Client.clientList["id"]:
+        players[i].scale = scale
 
 
 def gameLoop():
