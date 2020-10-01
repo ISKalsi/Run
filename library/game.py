@@ -83,17 +83,17 @@ def gameLoop():
             delPlayer(c)
 
         for i in c["id"]:
-            s = c["players"][f'{i}']
-            if i != x and i != j and players[i].currentState != s:
-                if s == State.active:
+            st, sc = c["players"][f'{i}']
+            if i != x and i != j and players[i].currentState != st:
+                if st == State.active:
                     players[i].Ground.start(update, 5)
-                elif s == State.idle:
+                elif st == State.idle:
                     players[i].Ground.stop(update)
-                elif s == State.jump:
+                elif st == State.jump:
                     players[i].jump(update)
 
             players[i].update()
-            players[i].draw(screen)
+            players[i].draw(screen, sc)
         d.flip()
 
     while True:
@@ -128,4 +128,8 @@ def gameLoop():
 
 
 x = addPlayer()
-gameLoop()
+
+if x != -1:
+    gameLoop()
+else:
+    print("Game full.")

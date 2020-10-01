@@ -6,7 +6,7 @@ HEADER = 1
 FORMAT = 'utf-8'
 PORT = 7777
 # SERVER = socket.gethostbyname(socket.gethostname())
-SERVER = '192.168.29.32'
+SERVER = '192.168.29.59'
 ADDR = (SERVER, PORT)
 
 clientList = {"count": 0, "id": [], "players": {}}
@@ -33,7 +33,7 @@ def handleClient(conn, addr):
 
     if ip in disconnected:
         print(f"\n[RECONNECTED] {ip}")
-        ID = disconnected[ip]
+        ID, score = disconnected[ip]
         del disconnected[ip]
     elif available:
         print(f"[NEW CONNECTION] {addr}")
@@ -43,21 +43,22 @@ def handleClient(conn, addr):
         clientList["id"].append(ID)
         clientList["id"].sort(reverse=True)
         clientList["count"] += 1
+        score = 0
     else:
         send(ID)
         conn.close()
         return
 
-    clientList["players"][ID] = State.idle
+    clientList["players"][ID] = (State.idle, score)
     send(ID)
 
     while True:
         # noinspection PyBroadException
         try:
-            msg = conn.recv(1024)
+            msg = conn.recv(2048)
 
             if msg:
-                current = json.loads(msg.decode(FORMAT))
+                current, score = json.loads(msg.decode(FORMAT))
                 if current == State.exit:
                     print("[Player ID: ", ID, "] Exit.", sep='')
                     # noinspection PyTypeChecker
@@ -74,7 +75,7 @@ def handleClient(conn, addr):
                 elif current == State.disconnected:
                     break
                 # noinspection PyTypeChecker
-                clientList["players"][ID] = current
+                clientList["players"][ID] = (current, score)
 
             send()
 
@@ -86,7 +87,7 @@ def handleClient(conn, addr):
         # except:
         #     print("(Server Side) some other shit")
 
-    disconnected[ip] = ID
+    disconnected[ip] = (ID, score)
     print("[Player ID: ", ID, "] Disconnect.", sep='')
     conn.close()
 
