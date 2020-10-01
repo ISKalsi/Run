@@ -67,6 +67,7 @@ def handleServer(client):
             if client.currentState == client.State.disconnected or client.currentState == client.State.exit:
                 jsonObj = json.dumps(client.currentState)
                 sock.send(jsonObj.encode(Client.FORMAT))
+                sock.recv(1)
                 break
             else:
                 clientList = sock.recv(1024).decode(client.FORMAT)

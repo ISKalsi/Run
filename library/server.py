@@ -67,6 +67,7 @@ def handleClient(conn, addr):
                     clientList["id"].sort(reverse=True)
                     clientList["count"] -= 1
 
+                    conn.send(b"0")
                     conn.close()
                     print("[CONNECTION CLOSED]\n")
                     return
