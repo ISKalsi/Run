@@ -1,8 +1,9 @@
 import socket
 import threading
 import json
+import sys
 
-HEADER = 1
+HEADER = 100
 FORMAT = 'utf-8'
 PORT = 7777
 # SERVER = socket.gethostbyname(socket.gethostname())
@@ -25,8 +26,8 @@ class State:
 
 def handleClient(conn, addr):
     def send(*args):
-        jsonObj = json.dumps((clientList, *args))
-        conn.send(jsonObj.encode(FORMAT))
+        jsonByteObj = json.dumps((clientList, *args)).encode(FORMAT)
+        conn.send(jsonByteObj + (HEADER - sys.getsizeof(jsonByteObj)) * b' ')
 
     ID: int = -1
     ip = addr[0]
@@ -55,7 +56,7 @@ def handleClient(conn, addr):
     while True:
         # noinspection PyBroadException
         try:
-            msg = conn.recv(2048)
+            msg = conn.recv(HEADER)
 
             if msg:
                 current, score = json.loads(msg.decode(FORMAT))

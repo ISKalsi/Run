@@ -2,6 +2,7 @@ import socket
 import json
 import threading
 import pygame
+import sys
 
 
 class Client:
@@ -10,6 +11,7 @@ class Client:
     PORT = 7777
     ADDR = (SERVER, PORT)
     FORMAT = 'utf-8'
+    HEADER = 100
     clientList = {}
 
     class State:
@@ -45,7 +47,7 @@ def handleServer(client):
     sock = client.sock
 
     try:
-        clientList = sock.recv(2048).decode(client.FORMAT)
+        clientList = sock.recv(client.HEADER).decode(client.FORMAT)
         C, ID = Client.clientList, client.id = json.loads(clientList)
 
         if ID == -1:
@@ -69,12 +71,12 @@ def handleServer(client):
                 client.currentState = client.State.disconnected
 
             if client.currentState == client.State.disconnected or client.currentState == client.State.exit:
-                jsonObj = json.dumps((client.currentState, client.Ground.scroll))
-                sock.send(jsonObj.encode(Client.FORMAT))
+                jsonByteObj = json.dumps((client.currentState, client.Ground.scroll)).encode(Client.FORMAT)
+                sock.send(jsonByteObj + (client.HEADER - sys.getsizeof(jsonByteObj)) * b' ')
                 sock.recv(10)
                 break
             else:
-                clientList = sock.recv(2048).decode(client.FORMAT)
+                clientList = sock.recv(client.HEADER).decode(client.FORMAT)
                 if clientList:
                     Client.clientList = json.loads(clientList)[0]
     except socket.error as e:
