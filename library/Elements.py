@@ -93,7 +93,7 @@ class Ground:
             isQuit()
 
             self.momentum -= 0.1
-            update()
+            update(self.ID)
 
             if self.momentum <= -cap:
                 break
@@ -104,7 +104,7 @@ class Ground:
             isQuit()
 
             self.momentum += 0.1
-            update()
+            update(self.ID)
 
         self.Player.currentState = Player.State.idle
 
@@ -196,12 +196,12 @@ class Player(Client):
         while True:
             c.tick(K.fps)
             self.momentum -= 2
-            update()
+            update(self.id)
             if self.y >= self.groundY:
                 self.y = self.groundY
                 self.momentum = 0
                 self.currentState = prevState
                 self.state[s.jump].currentFrame = 0
                 self.state[s.jump].delay = 0
-                update()
+                update(self.id)
                 break

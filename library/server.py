@@ -67,7 +67,6 @@ def handleClient(conn, addr):
                     clientList["id"].sort(reverse=True)
                     clientList["count"] -= 1
 
-                    send()
                     conn.close()
                     print("[CONNECTION CLOSED]\n")
                     return
@@ -79,10 +78,10 @@ def handleClient(conn, addr):
             send()
 
         except socket.error as e:
-            print("(Server Side) ", e)
+            print("(Server Side) SOCKET: ", e)
             break
         except json.decoder.JSONDecodeError as e:
-            print("(Server Side) ", e)
+            print("(Server Side) JSON: ", e)
         # except:
         #     print("(Server Side) some other shit")
 

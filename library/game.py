@@ -6,7 +6,9 @@ from library.Elements import Ground, Player
 from library.constants import K
 from library.Sprites import Sprites
 from library.client import Client
+
 pointTo = Sprites.Offset
+State = Client.State
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -72,7 +74,7 @@ def toggleFullscreen():
 
 
 def gameLoop():
-    def update():
+    def update(j=x):
         c = Client.clientList
         screen.fill(K.black)
         if c["count"] > N:
@@ -81,8 +83,15 @@ def gameLoop():
             delPlayer(c)
 
         for i in c["id"]:
-            if i != x:
-                setattr(players[i], "currentState", c["players"][f'{i}'])
+            s = c["players"][f'{i}']
+            if i != x and i != j and players[i].currentState != s:
+                if s == State.active:
+                    players[i].Ground.start(update, 5)
+                elif s == State.idle:
+                    players[i].Ground.stop(update)
+                elif s == State.jump:
+                    players[i].jump(update)
+
             players[i].update()
             players[i].draw(screen)
         d.flip()

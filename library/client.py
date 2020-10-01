@@ -14,11 +14,12 @@ class Client:
 
     class State:
         idle, active, jump = range(3)
-        exit = -1
-        disconnected = -2
+        full, disconnected, exit = range(-3, 0)
 
     def __init__(self, Player, clientList, ID):
         self.Player = Player
+        self.currentState = self.State.idle
+
         if ID is None:
             self.isClient = True
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,8 +33,6 @@ class Client:
             self.isClient = False
             Client.clientList = clientList
             self.id = ID
-
-        self.currentState = self.State.idle
 
     def __del__(self):
         self.currentState = self.State.disconnected
