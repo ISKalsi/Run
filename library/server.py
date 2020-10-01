@@ -60,6 +60,9 @@ def handleClient(conn, addr):
             if msg:
                 current, score = json.loads(msg.decode(FORMAT))
                 if current == State.exit:
+                    conn.send(b"0")
+                    conn.close()
+
                     print("[Player ID: ", ID, "] Exit.", sep='')
                     # noinspection PyTypeChecker
                     del clientList["players"][ID]
@@ -68,8 +71,6 @@ def handleClient(conn, addr):
                     clientList["id"].sort(reverse=True)
                     clientList["count"] -= 1
 
-                    conn.send(b"0")
-                    conn.close()
                     print("[CONNECTION CLOSED]\n")
                     return
                 elif current == State.disconnected:
@@ -86,7 +87,7 @@ def handleClient(conn, addr):
             print("(Server Side) JSON: ", e)
         # except:
         #     print("(Server Side) some other shit")
-
+    print(score)
     disconnected[ip] = (ID, score)
     print("[Player ID: ", ID, "] Disconnect.", sep='')
     conn.close()
