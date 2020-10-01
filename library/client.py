@@ -6,7 +6,7 @@ import pygame
 
 class Client:
     # SERVER = socket.gethostbyname(socket.gethostname())
-    SERVER = '192.168.29.32'
+    SERVER = '192.168.29.59'
     PORT = 7777
     ADDR = (SERVER, PORT)
     FORMAT = 'utf-8'
@@ -36,7 +36,7 @@ class Client:
 
     def __del__(self):
         self.currentState = self.State.disconnected
-        if self.isClient:
+        if self.isClient and self.id != -1:
             del Client.clientList["players"][f"{self.id}"]
             Client.clientList["count"] -= 1
 
@@ -49,25 +49,27 @@ def handleServer(client):
         C, ID = Client.clientList, client.id = json.loads(clientList)
 
         if ID == -1:
-            print("Game full. Exiting...")
             sock.close()
             return
 
     except socket.error as e:
         print("Arre? Starting mei hi error?! ", e)
 
+    while "Ground" not in client.__dict__:
+        pass
+
     try:
         while True:
-            jsonObj = json.dumps(client.currentState)
+            jsonObj = json.dumps((client.currentState, client.Ground.scroll))
             sock.send(jsonObj.encode(Client.FORMAT))
 
             if not pygame.display.get_active():
                 client.currentState = client.State.disconnected
 
             if client.currentState == client.State.disconnected or client.currentState == client.State.exit:
-                jsonObj = json.dumps(client.currentState)
+                jsonObj = json.dumps((client.currentState, client.Ground.scroll))
                 sock.send(jsonObj.encode(Client.FORMAT))
-                sock.recv(1)
+                sock.recv(10)
                 break
             else:
                 clientList = sock.recv(1024).decode(client.FORMAT)

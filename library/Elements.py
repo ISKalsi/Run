@@ -178,10 +178,10 @@ class Player(Client):
         self.y -= int(self.momentum)
         self.state[self.currentState].update(self.x, self.y, delay=3)
 
-    def draw(self, screen):
+    def draw(self, screen, score=None):
         self.Ground.sprites.draw(screen)
 
-        x = str(-int(self.Ground.scroll / 30))               # the score
+        x = str(-int((score if score else self.Ground.scroll) / 30))               # the score
         self.score.render_to(screen, (self.scoreX, 0), x, K.white)     # score's corresponding font object
         sprite = self.state[self.currentState]
         screen.blit(sprite.image, sprite.rect)
