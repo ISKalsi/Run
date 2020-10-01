@@ -45,7 +45,7 @@ def handleServer(client):
     sock = client.sock
 
     try:
-        clientList = sock.recv(1024).decode(client.FORMAT)
+        clientList = sock.recv(2048).decode(client.FORMAT)
         C, ID = Client.clientList, client.id = json.loads(clientList)
 
         if ID == -1:
@@ -57,6 +57,8 @@ def handleServer(client):
 
     while "Ground" not in client.__dict__:
         pass
+
+    client.Ground.scroll = client.clientList["players"][f"{client.id}"][1]
 
     try:
         while True:
@@ -72,7 +74,7 @@ def handleServer(client):
                 sock.recv(10)
                 break
             else:
-                clientList = sock.recv(1024).decode(client.FORMAT)
+                clientList = sock.recv(2048).decode(client.FORMAT)
                 if clientList:
                     Client.clientList = json.loads(clientList)[0]
     except socket.error as e:
