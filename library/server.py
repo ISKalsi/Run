@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import sys
+from library.constants import State
 
 HEADER = 100
 FORMAT = 'utf-8'
@@ -17,11 +18,6 @@ available.reverse()
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
-
-
-class State:
-    idle, active, jump = range(3)
-    full, disconnected, exit = range(-3, 0)
 
 
 def handleClient(conn, addr):

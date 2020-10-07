@@ -3,12 +3,11 @@ import pygame.freetype
 from pygame.locals import *
 import sys
 from library.Elements import Ground, Player
-from library.constants import K
+from library.constants import K, State
 from library.Sprites import Sprites
 from library.client import Client
 
 pointTo = Sprites.Offset
-State = Client.State
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -25,9 +24,9 @@ N = 0
 
 def generateStates():
     states = {
-        Player.State.active: Sprites("running animation", 13, offset=playerOffset),
-        Player.State.jump: Sprites("jump", 14, offset=playerOffset),
-        Player.State.idle: Sprites("idle", 16, offset=playerOffset)
+        State.active: Sprites("running animation", 13, offset=playerOffset),
+        State.jump: Sprites("jump", 14, offset=playerOffset),
+        State.idle: Sprites("idle", 16, offset=playerOffset)
     }
 
     return states
@@ -109,7 +108,7 @@ def gameLoop():
                     pygame.quit()
                     sys.exit()
                 if keys[K_q]:
-                    players[x].currentState = Client.State.exit
+                    players[x].currentState = State.exit
                     pygame.quit()
                     sys.exit()
 

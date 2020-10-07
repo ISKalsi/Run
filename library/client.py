@@ -3,6 +3,7 @@ import json
 import threading
 import pygame
 import sys
+from library.constants import State
 
 
 class Client:
@@ -14,13 +15,9 @@ class Client:
     HEADER = 100
     clientList = {}
 
-    class State:
-        idle, active, jump = range(3)
-        full, disconnected, exit = range(-3, 0)
-
     def __init__(self, Player, clientList, ID):
         self.Player = Player
-        self.currentState = self.State.idle
+        self.currentState = State.idle
 
         if ID is None:
             self.isClient = True
@@ -37,7 +34,7 @@ class Client:
             self.id = ID
 
     def __del__(self):
-        self.currentState = self.State.disconnected
+        self.currentState = State.disconnected
         if self.isClient and self.id != -1:
             del Client.clientList["players"][f"{self.id}"]
             Client.clientList["count"] -= 1
@@ -68,9 +65,9 @@ def handleServer(client):
             sock.send(jsonObj.encode(Client.FORMAT))
 
             if not pygame.display.get_active():
-                client.currentState = client.State.disconnected
+                client.currentState = State.disconnected
 
-            if client.currentState == client.State.disconnected or client.currentState == client.State.exit:
+            if client.currentState == State.disconnected or client.currentState == State.exit:
                 jsonByteObj = json.dumps((client.currentState, client.Ground.scroll)).encode(Client.FORMAT)
                 sock.send(jsonByteObj + (client.HEADER - sys.getsizeof(jsonByteObj)) * b' ')
                 sock.recv(10)

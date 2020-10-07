@@ -14,3 +14,8 @@ class K:
 
     # fonts
     scoreFont = "LcdSolid.ttf"
+
+
+class State:
+    idle, active, jump = range(3)
+    full, disconnected, exit = range(-3, 0)

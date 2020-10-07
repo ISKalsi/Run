@@ -4,7 +4,7 @@ import pygame.freetype
 from pygame.locals import *
 from math import ceil
 import sys
-from library.constants import K
+from library.constants import K, State
 from library.client import Client
 
 d = pygame.display
@@ -86,7 +86,7 @@ class Ground:
             g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h + self.baseY)
 
     def start(self, update, cap):
-        self.Player.currentState = Player.State.active
+        self.Player.currentState = State.active
 
         while True:
             c.tick(K.fps)
@@ -106,7 +106,7 @@ class Ground:
             self.momentum += 0.1
             update(self.ID)
 
-        self.Player.currentState = Player.State.idle
+        self.Player.currentState = State.idle
 
 
 class Player(Client):
@@ -188,10 +188,9 @@ class Player(Client):
 
     def jump(self, update):
         self.momentum = 30
-        s = Player.State
         prevState = self.currentState
-        self.currentState = s.jump
-        self.state[s.jump].currentFrame = 4
+        self.currentState = State.jump
+        self.state[State.jump].currentFrame = 4
 
         while True:
             c.tick(K.fps)
@@ -201,7 +200,7 @@ class Player(Client):
                 self.y = self.groundY
                 self.momentum = 0
                 self.currentState = prevState
-                self.state[s.jump].currentFrame = 0
-                self.state[s.jump].delay = 0
+                self.state[State.jump].currentFrame = 0
+                self.state[State.jump].delay = 0
                 update(self.id)
                 break
