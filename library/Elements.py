@@ -99,6 +99,14 @@ class Ground:
                 break
 
     def stop(self, update):
+        while self.Player.state[self.Player.currentState].currentFrame != 0:
+            c.tick(K.fps)
+            isQuit()
+
+            update(self.ID)
+
+        self.Player.currentState = State.slowDown
+
         while self.momentum < 0:
             c.tick(K.fps)
             isQuit()
@@ -106,6 +114,7 @@ class Ground:
             self.momentum += 0.1
             update(self.ID)
 
+        self.Player.state[self.Player.currentState].currentFrame = 0
         self.Player.currentState = State.idle
 
 

@@ -17,5 +17,5 @@ class K:
 
 
 class State:
-    idle, active, jump = range(3)
+    idle, active, jump, slowDown = range(4)
     full, disconnected, exit = range(-3, 0)

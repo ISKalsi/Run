@@ -26,7 +26,8 @@ def generateStates():
     states = {
         State.active: Sprites("running animation", 13, offset=playerOffset),
         State.jump: Sprites("jump", 14, offset=playerOffset),
-        State.idle: Sprites("idle", 16, offset=playerOffset)
+        State.idle: Sprites("idle", 16, offset=playerOffset),
+        State.slowDown: Sprites("run to stop", 13, offset=playerOffset)
     }
 
     return states
