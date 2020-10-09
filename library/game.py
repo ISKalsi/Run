@@ -73,8 +73,20 @@ def toggleFullscreen():
         players[i].scale = scale
 
 
+def isQuit():
+    if pygame.event.get(QUIT):
+        pygame.quit()
+        sys.exit()
+    if pygame.event.get(KEYDOWN):
+        if pygame.key.get_pressed()[K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+
+
 def gameLoop():
     def update(j=x):
+        isQuit()
+
         c = Client.clientList
         screen.fill(K.black)
         if c["count"] > N:

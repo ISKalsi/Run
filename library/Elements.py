@@ -1,24 +1,12 @@
 from library.Sprites import Sprites
 import pygame
 import pygame.freetype
-from pygame.locals import *
 from math import ceil
-import sys
 from library.constants import K, State
 from library.client import Client
 
 d = pygame.display
 c = pygame.time.Clock()
-
-
-def isQuit():
-    if pygame.event.get(QUIT):
-        pygame.quit()
-        sys.exit()
-    if pygame.event.get(KEYDOWN):
-        if pygame.key.get_pressed()[K_ESCAPE]:
-            pygame.quit()
-            sys.exit()
 
 
 class Ground:
@@ -90,7 +78,6 @@ class Ground:
 
         while True:
             c.tick(K.fps)
-            isQuit()
 
             self.momentum -= 0.1
             update(self.ID)
@@ -101,7 +88,6 @@ class Ground:
     def stop(self, update):
         while self.Player.state[self.Player.currentState].currentFrame != 0:
             c.tick(K.fps)
-            isQuit()
 
             update(self.ID)
 
@@ -109,7 +95,6 @@ class Ground:
 
         while self.momentum < 0:
             c.tick(K.fps)
-            isQuit()
 
             self.momentum += 0.1
             update(self.ID)
