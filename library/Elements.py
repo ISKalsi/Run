@@ -26,7 +26,7 @@ class Ground:
 
         self.s = scale
         g = self.array = self.generateGround(name, scale)
-        self.sprites = pygame.sprite.Group(g)
+        self.sprites = pygame.sprite.Group(*g)
 
         self.scroll = 0
         self.momentum = 0
@@ -38,7 +38,7 @@ class Ground:
     @scale.setter
     def scale(self, new):
         g = self.array = self.generateGround(self.name, new)
-        self.sprites = pygame.sprite.Group([tile for tile in g])
+        self.sprites = pygame.sprite.Group(*g)
 
     @property
     def id(self):
