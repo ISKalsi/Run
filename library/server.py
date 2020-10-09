@@ -91,13 +91,19 @@ def handleClient(conn, addr):
 
 
 def start():
-    server.listen()
-    print("[LISTENING ON] ", SERVER)
-    while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handleClient, args=(conn, addr))
-        thread.start()
-        print("\n[ACTIVE CONNECTIONS] ", threading.activeCount() - 1)
+    try:
+        server.listen()
+        print("[LISTENING ON] ", SERVER)
+        while True:
+            conn, addr = server.accept()
+            thread = threading.Thread(target=handleClient, args=(conn, addr))
+            thread.start()
+            print("\n[ACTIVE CONNECTIONS] ", threading.activeCount() - 1)
+    except socket.error as e:
+        print("(Server Side)", e)
+    except KeyboardInterrupt:
+        server.close()
+        print("[SERVER CLOSED]")
 
 
 print("[STARTING SERVER]...")
