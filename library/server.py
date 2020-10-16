@@ -4,7 +4,7 @@ import json
 import sys
 from library.constants import State
 
-HEADER = 100
+HEADER = 1000
 FORMAT = 'utf-8'
 PORT = 7777
 # SERVER = socket.gethostbyname(socket.gethostname())
@@ -85,6 +85,7 @@ def handleClient(conn, addr):
         # except:
         #     print("(Server Side) some other shit")
 
+    clientList["players"][ID] = (State.disconnected, score)
     disconnected[ip] = (ID, score)
     print("[Player ID: ", ID, "] Disconnect.", sep='')
     conn.close()

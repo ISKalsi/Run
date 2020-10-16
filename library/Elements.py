@@ -180,6 +180,32 @@ class Player(Client):
         sprite = self.state[self.currentState]
         screen.blit(sprite.image, sprite.rect)
 
+    def disconnect(self, update):
+        if self.currentState == State.active:
+            self.Ground.stop(update)
+
+        while self.state[self.currentState].currentFrame != 1:
+            c.tick(K.fps)
+            update(self.id)
+
+        self.currentState = State.disconnected
+        self.state[self.currentState].reverse = False
+        self.state[self.currentState].dead = False
+        self.state[self.currentState].currentFrame = 0
+        update(self.id)
+
+    def reconnect(self, update):
+        self.state[self.currentState].reverse = True
+        self.state[self.currentState].dead = False
+
+        while not self.state[self.currentState].dead:
+            c.tick(K.fps)
+            update(self.id)
+
+        self.currentState = State.idle
+        self.state[self.currentState].currentFrame = 0
+        update(self.id)
+
     def jump(self, update):
         self.momentum = 30
         prevState = self.currentState

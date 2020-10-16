@@ -12,7 +12,7 @@ class Client:
     PORT = 7777
     ADDR = (SERVER, PORT)
     FORMAT = 'utf-8'
-    HEADER = 100
+    HEADER = 1000
     clientList = {}
 
     def __init__(self, Player, clientList, ID):

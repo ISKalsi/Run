@@ -27,7 +27,8 @@ def generateStates():
         State.active: Sprites("running animation", 13, offset=playerOffset),
         State.jump: Sprites("jump", 14, offset=playerOffset),
         State.idle: Sprites("idle", 16, offset=playerOffset),
-        State.slowDown: Sprites("run to stop", 13, offset=playerOffset)
+        State.slowDown: Sprites("run to stop", 13, offset=playerOffset),
+        State.disconnected: Sprites("disconnect", 13, offset=playerOffset, once=True)
     }
 
     return states
@@ -100,9 +101,14 @@ def gameLoop():
                 if st == State.active:
                     players[i].Ground.start(update, 5)
                 elif st == State.idle:
-                    players[i].Ground.stop(update)
+                    if players[i].currentState == State.disconnected:
+                        players[i].reconnect(update)
+                    else:
+                        players[i].Ground.stop(update)
                 elif st == State.jump:
                     players[i].jump(update)
+                elif st == State.disconnected:
+                    players[i].disconnect(update)
 
             players[i].update()
             players[i].draw(screen, sc)

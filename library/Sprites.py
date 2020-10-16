@@ -24,7 +24,6 @@ class SpriteSheet:
         for i in range(self.frames):
             self.images.append(self._getImage(self.cells[i]))
 
-        self.once = False
         f = self.currentFrame = 0
         self.image = self.images[f]
         self.rect = self.cells[f]
@@ -43,7 +42,7 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
         midLeft, midRight, \
         bottomLeft, bottomMid, bottomRight = range(9)
 
-    def __init__(self, name, frames=0, path="", offset=Offset.topLeft):
+    def __init__(self, name, frames=0, path="", offset=Offset.topLeft, once=False, reverse=False):
         pygame.sprite.Sprite.__init__(self)
         if frames == 0:
             SpriteSheet.__init__(self, name, path)
@@ -63,7 +62,6 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
                 [self.images[i].get_rect() for i in range(frames)]
             )
 
-            self.once = False
             f = self.currentFrame = 0
             self.image = self.images[f]
             self.rect: pygame.Rect = self.cells[f]
@@ -71,7 +69,9 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
         self.originalWidth = self.rect.w
         self.originalHeight = self.rect.h
         self.delay = 0
+        self.once = once
         self.dead = False
+        self.reverse = reverse
         self.offset = offset
         self.offsetX = self.offsetY = 0
         self.pointTo(offset)
@@ -153,23 +153,21 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
         self.rect = self.cells[self.currentFrame]
         self.pointTo(self.offset)
 
-    def update(self, x=0, y=0, once=False, delay=0):
+    def update(self, x=0, y=0, delay=0):
         if self.dead:
-            f = self.currentFrame = 12
+            pass
         else:
             if self.delay:
-                self.once = once
                 self.delay -= 1
                 return
 
             self.delay = delay
-            self.once = once
-            f = self.currentFrame = (self.currentFrame + 1) % self.frames
+            f = self.currentFrame = (self.currentFrame + (-1 if self.reverse else 1)) % self.frames
 
-            if once and f == 0:
-                self.once = False
+            if self.once and f == self.frames - 1:
+                self.dead = True
 
-        self.image = self.images[f]
-        self.rect = self.cells[f]
+        self.image = self.images[self.currentFrame]
+        self.rect = self.cells[self.currentFrame]
         self.x = x
         self.y = y
