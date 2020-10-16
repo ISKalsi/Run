@@ -78,6 +78,8 @@ def handleServer(client):
                     Client.clientList = json.loads(clientList)[0]
     except socket.error as e:
         print("(Client Side) ", e)
+    except Exception as e:
+        print("(Client Side) ", e)
 
     print("Disconnected Client: ", client.id)
     sock.close()

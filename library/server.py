@@ -82,8 +82,8 @@ def handleClient(conn, addr):
             break
         except json.decoder.JSONDecodeError as e:
             print("(Server Side) JSON: ", e)
-        # except:
-        #     print("(Server Side) some other shit")
+        except Exception as e:
+            print("(Server Side) some other shit", e)
 
     clientList["players"][ID] = (State.disconnected, score)
     disconnected[ip] = (ID, score)
