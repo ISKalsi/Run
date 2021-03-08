@@ -38,9 +38,9 @@ class SpriteSheet:
 class Sprites(pygame.sprite.Sprite, SpriteSheet):
     class Offset:
         center, \
-        topLeft, topMid, topRight, \
-        midLeft, midRight, \
-        bottomLeft, bottomMid, bottomRight = range(9)
+            topLeft, topMid, topRight, \
+            midLeft, midRight, \
+            bottomLeft, bottomMid, bottomRight = range(9)
 
     def __init__(self, name, frames=0, path="", offset=Offset.topLeft, once=False, reverse=False):
         pygame.sprite.Sprite.__init__(self)

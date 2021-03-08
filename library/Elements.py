@@ -3,10 +3,9 @@ import pygame
 import pygame.freetype
 from math import ceil
 from library.constants import K, State
-from library.client import Client
 
-d = pygame.display
-c = pygame.time.Clock()
+display = pygame.display
+clock = pygame.time.Clock()
 
 
 class Ground:
@@ -52,10 +51,10 @@ class Ground:
     def generateGround(self, name, scale=4):
         self.tile.scale(scale, True)
 
-        gw = self.groundW = int(self.tile.rect.w * 0.8)
+        gw = self.groundW = int(self.tile.rect.w)
         self.baseY = - int(self.tile.rect.h * 0.9 * self.id)
 
-        n = ceil(d.Info().current_w / gw) + 2
+        n = ceil(display.Info().current_w / gw) + 2
         g = tuple([Sprites(name, 1) for _ in range(n)])
         [g[i].scale(scale, True) for i in range(len(g))]
 
@@ -67,7 +66,7 @@ class Ground:
         g = self.array
         t = self.tile.rect
         gw = self.groundW
-        h = d.Info().current_h
+        h = display.Info().current_h
         initialOffset = -t.w
         w = (len(g)) * gw
         for i in range(len(g)):
@@ -77,39 +76,37 @@ class Ground:
         self.Player.currentState = State.active
 
         while True:
-            c.tick(K.fps)
+            clock.tick(K.fps)
 
             self.momentum -= 0.1
-            update(self.ID)
+            update()
 
             if self.momentum <= -cap:
                 break
 
     def stop(self, update):
         while self.Player.state[self.Player.currentState].currentFrame != 0:
-            c.tick(K.fps)
+            clock.tick(K.fps)
 
-            update(self.ID)
+            update()
 
         self.Player.currentState = State.slowDown
 
         while self.momentum < 0:
-            c.tick(K.fps)
+            clock.tick(K.fps)
 
             self.momentum += 0.1
-            update(self.ID)
+            update()
 
         self.Player.state[self.Player.currentState].currentFrame = 0
         self.Player.currentState = State.idle
 
 
-class Player(Client):
+class Player:
     # Constructor
-    def __init__(self, states, ground, screen=(0, 0), scale=1, clientList=None, ID=None):
-        Client.__init__(self, self, clientList, ID)
-
-        while self.id is None:
-            pass
+    def __init__(self, states, ground, screen=(0, 0), scale=1):
+        self.id = 0
+        self.currentState = State.idle
 
         self.groundY: int  # for jump handling
         self.momentum = 0
@@ -149,7 +146,7 @@ class Player(Client):
     @scale.setter
     def scale(self, new):
         self.s = new
-        S = (d.Info().current_w, d.Info().current_h)
+        S = (display.Info().current_w, display.Info().current_h)
 
         self.score = pygame.freetype.Font(K.scoreFont, 30 * new)
         self.scoreX = S[0] / 4 * self.id
@@ -180,31 +177,31 @@ class Player(Client):
         sprite = self.state[self.currentState]
         screen.blit(sprite.image, sprite.rect)
 
-    def disconnect(self, update):
-        if self.currentState == State.active:
-            self.Ground.stop(update)
-
-        while self.state[self.currentState].currentFrame != 1:
-            c.tick(K.fps)
-            update(self.id)
-
-        self.currentState = State.disconnected
-        self.state[self.currentState].reverse = False
-        self.state[self.currentState].dead = False
-        self.state[self.currentState].currentFrame = 0
-        update(self.id)
-
-    def reconnect(self, update):
-        self.state[self.currentState].reverse = True
-        self.state[self.currentState].dead = False
-
-        while not self.state[self.currentState].dead:
-            c.tick(K.fps)
-            update(self.id)
-
-        self.currentState = State.idle
-        self.state[self.currentState].currentFrame = 0
-        update(self.id)
+    # def disconnect(self, update):
+    #     if self.currentState == State.active:
+    #         self.Ground.stop(update)
+    #
+    #     while self.state[self.currentState].currentFrame != 1:
+    #         c.tick(K.fps)
+    #         update(self.id)
+    #
+    #     self.currentState = State.disconnected
+    #     self.state[self.currentState].reverse = False
+    #     self.state[self.currentState].dead = False
+    #     self.state[self.currentState].currentFrame = 0
+    #     update(self.id)
+    #
+    # def reconnect(self, update):
+    #     self.state[self.currentState].reverse = True
+    #     self.state[self.currentState].dead = False
+    #
+    #     while not self.state[self.currentState].dead:
+    #         c.tick(K.fps)
+    #         update(self.id)
+    #
+    #     self.currentState = State.idle
+    #     self.state[self.currentState].currentFrame = 0
+    #     update(self.id)
 
     def jump(self, update):
         self.momentum = 30
@@ -213,14 +210,20 @@ class Player(Client):
         self.state[State.jump].currentFrame = 4
 
         while True:
-            c.tick(K.fps)
+            clock.tick(K.fps)
             self.momentum -= 2
-            update(self.id)
+            update()
             if self.y >= self.groundY:
                 self.y = self.groundY
                 self.momentum = 0
                 self.currentState = prevState
                 self.state[State.jump].currentFrame = 0
                 self.state[State.jump].delay = 0
-                update(self.id)
+                update()
                 break
+
+
+class Obstacle:
+    def __init__(self, variations):
+        self.variations = variations
+        self.scaleRange = (1, 2)

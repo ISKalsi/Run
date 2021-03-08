@@ -1,25 +1,27 @@
 import pygame
 import pygame.freetype
 from pygame.locals import *
+
 import sys
+
 from library.Elements import Ground, Player
 from library.constants import K, State
 from library.Sprites import Sprites
-from library.client import Client
 
 pointTo = Sprites.Offset
 
+playerOffset = (0.5, 0.87)
+player: Player
+score = 0
+
 pygame.init()
 clock = pygame.time.Clock()
-d = pygame.display
-SCREENSIZE = (d.Info().current_w, d.Info().current_h)
-screen = d.set_mode((K.width, K.height))
-fullscreen = False
-d.set_caption("RUN")
+display = pygame.display
 
-playerOffset = (0.5, 0.87)
-players = {}
-N = 0
+
+K.screenSize = (display.Info().current_w, display.Info().current_h)
+screen = display.set_mode((K.width, K.height))
+display.set_caption("RUN")
 
 
 def generateStates():
@@ -34,44 +36,14 @@ def generateStates():
     return states
 
 
-def addPlayer(c=None):
-    global N
-
-    if c:
-        for i in c["id"]:
-            if i == x:
-                continue
-
-            P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2, clientList=c, ID=i)
-            players[i] = P
-            N += 1
-    else:
-        P = Player(generateStates(), Ground("ground"), screen=(K.width, K.height), scale=2)
-        print(P.id)
-        players[P.id] = P
-        N += 1
-        return P.id
-
-
-def delPlayer(c):
-    global N
-    k = 0
-    for i in range(N):
-        if i not in c["id"] and i in players:
-            del players[i]
-            k += 1
-    N -= k
-
-
 def toggleFullscreen():
-    global fullscreen, screen
+    global screen
 
-    fullscreen = not fullscreen
-    screen = d.set_mode(SCREENSIZE, FULLSCREEN) if fullscreen else d.set_mode((K.width, K.height))
+    K.fullscreen = not K.fullscreen
+    screen = display.set_mode(K.screenSize, FULLSCREEN) if K.fullscreen else display.set_mode((K.width, K.height))
 
-    scale = 3 if fullscreen else 2
-    for i in Client.clientList["id"]:
-        players[i].scale = scale
+    scale = 3 if K.fullscreen else 2
+    player.scale = scale
 
 
 def isQuit():
@@ -85,34 +57,12 @@ def isQuit():
 
 
 def gameLoop():
-    def update(j=x):
-        isQuit()
-
-        c = Client.clientList
+    def update():
         screen.fill(K.black)
-        if c["count"] > N:
-            addPlayer(c)
-        elif c["count"] < N:
-            delPlayer(c)
 
-        for i in c["id"]:
-            st, sc = c["players"][f'{i}']
-            if i != x and i != j and players[i].currentState != st:
-                if st == State.active:
-                    players[i].Ground.start(update, 5)
-                elif st == State.idle:
-                    if players[i].currentState == State.disconnected:
-                        players[i].reconnect(update)
-                    else:
-                        players[i].Ground.stop(update)
-                elif st == State.jump:
-                    players[i].jump(update)
-                elif st == State.disconnected:
-                    players[i].disconnect(update)
-
-            players[i].update()
-            players[i].draw(screen, sc)
-        d.flip()
+        player.update()
+        player.draw(screen, score)
+        display.flip()
 
     while True:
         clock.tick(K.fps)
@@ -127,7 +77,7 @@ def gameLoop():
                     pygame.quit()
                     sys.exit()
                 if keys[K_q]:
-                    players[x].currentState = State.exit
+                    player.currentState = State.exit
                     pygame.quit()
                     sys.exit()
 
@@ -136,18 +86,14 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    players[x].Ground.start(update, 5)
+                    player.Ground.start(update, 5)
                 elif keys[K_x]:
-                    players[x].Ground.stop(update)
+                    player.Ground.stop(update)
                 elif keys[K_j]:
-                    players[x].jump(update)
+                    player.jump(update)
 
         update()
 
 
-x = addPlayer()
-
-if x != -1:
-    gameLoop()
-else:
-    print("Game full.")
+player = Player(generateStates(), Ground("footpath"), screen=(K.width, K.height), scale=2)
+gameLoop()

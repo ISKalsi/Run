@@ -1,5 +1,7 @@
 class K:
     # screen
+    screenSize: tuple[int, int]
+    fullScreen = False
     width = 1200
     height = 800
     fps = 60
