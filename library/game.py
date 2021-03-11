@@ -3,10 +3,10 @@ import pygame.freetype
 from pygame.locals import *
 
 import sys
-
 from library.Elements import Ground, Player
 from library.constants import K, State
 from library.Sprites import Sprites
+from library.ui import Background
 
 pointTo = Sprites.Offset
 
@@ -20,7 +20,8 @@ display = pygame.display
 
 
 K.screenSize = (display.Info().current_w, display.Info().current_h)
-screen = display.set_mode((K.width, K.height))
+K.currentScreenSize = (K.width, K.height)
+screen = display.set_mode(K.currentScreenSize)
 display.set_caption("RUN")
 
 
@@ -39,11 +40,18 @@ def generateStates():
 def toggleFullscreen():
     global screen
 
-    K.fullscreen = not K.fullscreen
-    screen = display.set_mode(K.screenSize, FULLSCREEN) if K.fullscreen else display.set_mode((K.width, K.height))
+    K.isFullScreen = not K.isFullScreen
+    if K.isFullScreen:
+        K.currentScreenSize = K.screenSize
+        screen = display.set_mode(K.screenSize, FULLSCREEN)
+        scale = 3
+    else:
+        K.currentScreenSize = (K.width, K.height)
+        screen = display.set_mode((K.width, K.height))
+        scale = 2
 
-    scale = 3 if K.fullscreen else 2
     player.scale = scale
+    background.scaleToFitHeight()
 
 
 def isQuit():
@@ -58,11 +66,13 @@ def isQuit():
 
 def gameLoop():
     def update():
-        screen.fill(K.black)
-
+        background.update()
         player.update()
-        player.draw(screen, score)
-        display.flip()
+
+        background.draw(screen)
+        player.draw(screen)
+
+        display.update()
 
     while True:
         clock.tick(K.fps)
@@ -86,14 +96,18 @@ def gameLoop():
                     continue
 
                 if keys[K_SPACE]:
-                    player.Ground.start(update, 5)
+                    player.Ground.start(10, 0.6)
+                    background.start()
                 elif keys[K_x]:
-                    player.Ground.stop(update)
+                    player.Ground.stop()
+                    background.stop()
                 elif keys[K_j]:
-                    player.jump(update)
+                    player.jump()
 
         update()
 
 
-player = Player(generateStates(), Ground("footpath"), screen=(K.width, K.height), scale=2)
+player = Player(generateStates(), Ground("footpath"), scale=2)
+bgLayers = "sky", "MountBack", "MountMiddle", "MountFront", "BuildingsBack"
+background = Background(bgLayers, (2, 4))
 gameLoop()

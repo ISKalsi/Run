@@ -1,143 +1,156 @@
 from library.Sprites import Sprites
-import pygame
 import pygame.freetype
 from math import ceil
 from library.constants import K, State
 
-display = pygame.display
-clock = pygame.time.Clock()
-
 
 class Ground:
-    totalGrounds = 0
-
     def __init__(self, name, scale=4):
         self.name = name
-        self.tile = Sprites(name, 1)
+        t = self.tile = Sprites(name, 1)
 
         self.Player = None                        # initialize with player when using this class
 
-        Ground.totalGrounds += 1
-        i = self.ID = Ground.totalGrounds - 1
-
-        self.groundW = int(self.tile.rect.w * 0.8)
-        self.baseY = - int(self.tile.rect.h * i)
-
-        self.s = scale
+        self.__scale = scale
         g = self.array = self.generateGround(name, scale)
+        n = self.arrayN = len(self.array)
+        self.netWidth = t.w * n
         self.sprites = pygame.sprite.Group(*g)
 
         self.scroll = 0
-        self.momentum = 0
+        self.velocity = 0
+        self.acceleration = 0
+        self.__startRate = 0
+
+        self.__isStart = False
+        self.__isStop = False
+
+        self.__startIterator = None
+        self.__stopIterator = None
 
     @property
     def scale(self):
-        return self.s
+        return self.__scale
 
     @scale.setter
     def scale(self, new):
         g = self.array = self.generateGround(self.name, new)
+        N = self.arrayN = len(self.array)
+        self.netWidth = self.tile.w * N
         self.sprites = pygame.sprite.Group(*g)
-
-    @property
-    def id(self):
-        return self.ID
-
-    @id.setter
-    def id(self, new):
-        self.ID = new
-        self.baseY = - int(self.tile.rect.h * new)
 
     def generateGround(self, name, scale=4):
         self.tile.scale(scale, True)
 
-        gw = self.groundW = int(self.tile.rect.w)
-        self.baseY = - int(self.tile.rect.h * 0.9 * self.id)
-
-        n = ceil(display.Info().current_w / gw) + 2
+        w = int(self.tile.w)
+        n = ceil(K.currentScreenSize[0] / w) + 1
         g = tuple([Sprites(name, 1) for _ in range(n)])
-        [g[i].scale(scale, True) for i in range(len(g))]
+        for i, ground in enumerate(g):
+            ground.scale(scale, True)
+            ground.x = -self.tile.w + (self.tile.w * i)
+            ground.y = K.currentScreenSize[1] - self.tile.h
 
         return g
 
+    def start(self, maxSpeed, timeInSec):
+        self.__startRate = maxSpeed * 2 / (timeInSec * K.fps) ** 2
+
+        if -maxSpeed < self.velocity:
+            self.__isStart = True
+            self.__startIterator = self.__start(self.__startRate, int(timeInSec * K.fps))
+
+    def stop(self):
+        if not self.__isStop:
+            self.__isStop = True
+            self.__stopIterator = self.__stop()
+
     def update(self):
-        self.scroll += int(self.momentum)
+        self.scroll += int(self.velocity)
 
-        g = self.array
-        t = self.tile.rect
-        gw = self.groundW
-        h = display.Info().current_h
-        initialOffset = -t.w
-        w = (len(g)) * gw
-        for i in range(len(g)):
-            g[i].update(initialOffset + (gw * i + self.scroll) % w, h - t.h + self.baseY)
+        if self.__isStart:
+            try:
+                next(self.__startIterator)
+            except StopIteration:
+                self.__isStart = False
 
-    def start(self, update, cap):
+        if self.__isStop:
+            try:
+                next(self.__stopIterator)
+            except StopIteration:
+                self.__isStop = False
+
+        for g in self.array:
+            g.updateDisplacementX(self.velocity)
+            if g.x < -self.tile.w:
+                g.updateDisplacementX(self.netWidth)
+
+    def __start(self, rate, frames):
         self.Player.currentState = State.active
 
-        while True:
-            clock.tick(K.fps)
+        for _ in range(frames):
+            self.acceleration -= rate
+            self.velocity += self.acceleration
 
-            self.momentum -= 0.1
-            update()
+            yield
 
-            if self.momentum <= -cap:
-                break
+        self.acceleration = 0
 
-    def stop(self, update):
-        while self.Player.state[self.Player.currentState].currentFrame != 0:
-            clock.tick(K.fps)
-
-            update()
+    def __stop(self):
+        while self.Player.sprites[self.Player.currentState].currentFrame != 0:
+            yield
 
         self.Player.currentState = State.slowDown
 
-        while self.momentum < 0:
-            clock.tick(K.fps)
+        while self.velocity < 0:
+            self.acceleration += self.__startRate
+            self.velocity += self.acceleration
 
-            self.momentum += 0.1
-            update()
+            yield
+        else:
+            self.velocity = self.acceleration = 0
 
-        self.Player.state[self.Player.currentState].currentFrame = 0
+        self.Player.sprites[self.Player.currentState].currentFrame = 0
         self.Player.currentState = State.idle
 
 
 class Player:
     # Constructor
-    def __init__(self, states, ground, screen=(0, 0), scale=1):
-        self.id = 0
+    def __init__(self, sprites, ground, scale=1):
         self.currentState = State.idle
 
         self.groundY: int  # for jump handling
-        self.momentum = 0
+        self.velocity = 0
+        self.acceleration = 0
 
         G = self.Ground = ground  # Ground underneath the Player
         G.Player = self
-        G.id = self.id
 
-        self.state = states
+        self.sprites: dict[State, Sprites] = sprites
 
         self.score = pygame.freetype.Font(K.scoreFont, 30 * scale)
-        self.scoreX = screen[0]/4 * self.id
 
-        self.s = self.scale = scale
+        self.s = scale
+        self.scale = scale
+
+        self.__isJump = False
+        self.__jumpIterator = None
 
     # getters&setters + decorated properties
     @property
     def x(self):
-        return self.state[self.currentState].x
+        return self.sprites[self.currentState].x
 
     @x.setter
     def x(self, new):
-        self.state[self.currentState].x = new
+        self.sprites[self.currentState].x = new
 
     @property
     def y(self):
-        return self.state[self.currentState].y
+        return self.sprites[self.currentState].y
 
     @y.setter
     def y(self, new):
-        self.state[self.currentState].y = new
+        self.sprites[self.currentState].y = new
 
     @property
     def scale(self):
@@ -146,36 +159,44 @@ class Player:
     @scale.setter
     def scale(self, new):
         self.s = new
-        S = (display.Info().current_w, display.Info().current_h)
+        S = K.currentScreenSize
 
         self.score = pygame.freetype.Font(K.scoreFont, 30 * new)
-        self.scoreX = S[0] / 4 * self.id
 
         self.Ground.scale = 4
-        baseY = self.Ground.baseY
         groundH = self.Ground.tile.h
 
-        x = int(S[0] * 0.10 * (self.id+1))
-        y = self.groundY = S[1] - int(groundH * 0.8) + baseY
-        for sprite in self.state.values():
+        x = int(S[0] * 0.10)
+        y = self.groundY = S[1] - int(groundH * 0.8)
+        for sprite in self.sprites.values():
             sprite.scale(new, True)
-            sprite.x = x
-            sprite.y = y
+            sprite.setGlobalPosition(x, y)
+
+    def jump(self):
+        self.__isJump = True
+        self.__jumpIterator = self.__jump(2000, 0.4)
 
     # methods
     def update(self):
         self.Ground.update()
 
-        self.y -= int(self.momentum)
-        self.state[self.currentState].update(self.x, self.y, delay=3)
+        if self.__isJump:
+            try:
+                next(self.__jumpIterator)
+            except StopIteration:
+                self.__isJump = False
 
-    def draw(self, screen, score=None):
+        y = self.y
+        self.sprites[self.currentState].update(delay=2)
+        self.y = y + int(self.velocity)
+
+    def draw(self, screen):
         self.Ground.sprites.draw(screen)
 
-        x = str(-int((score if score else self.Ground.scroll) / 30))               # the score
-        self.score.render_to(screen, (self.scoreX, 0), x, K.white)     # score's corresponding font object
-        sprite = self.state[self.currentState]
-        screen.blit(sprite.image, sprite.rect)
+        x = str(-int(self.Ground.scroll / 30))               # the score
+        self.score.render_to(screen, (0, 0), x, K.white)     # score's corresponding font object
+        sprite = self.sprites[self.currentState]
+        sprite.draw(screen)
 
     # def disconnect(self, update):
     #     if self.currentState == State.active:
@@ -202,28 +223,32 @@ class Player:
     #     self.currentState = State.idle
     #     self.state[self.currentState].currentFrame = 0
     #     update(self.id)
+    def __setJumpHeight(self, height, time):
+        self.acceleration = height / time / time
+        self.velocity = - self.acceleration * time / 2
 
-    def jump(self, update):
-        self.momentum = 30
+    def __jump(self, heightInPx, timeInSec):
+        self.__setJumpHeight(heightInPx, timeInSec * K.fps)
         prevState = self.currentState
         self.currentState = State.jump
-        self.state[State.jump].currentFrame = 4
+        self.sprites[State.jump].currentFrame = 4
 
         while True:
-            clock.tick(K.fps)
-            self.momentum -= 2
-            update()
-            if self.y >= self.groundY:
+            self.velocity += self.acceleration
+
+            yield
+
+            if self.y > self.groundY:
                 self.y = self.groundY
-                self.momentum = 0
+                self.velocity = 0
+                self.acceleration = 0
                 self.currentState = prevState
-                self.state[State.jump].currentFrame = 0
-                self.state[State.jump].delay = 0
-                update()
-                break
+                self.sprites[State.jump].currentFrame = 0
+                self.sprites[State.jump].delay = 0
+                return
 
 
 class Obstacle:
-    def __init__(self, variations):
+    def __init__(self, variations: list[Sprites]):
         self.variations = variations
         self.scaleRange = (1, 2)

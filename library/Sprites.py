@@ -1,4 +1,5 @@
 import json
+from pygame.draw_py import floor
 from pathlib import Path
 import pygame
 
@@ -44,6 +45,7 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
 
     def __init__(self, name, frames=0, path="", offset=Offset.topLeft, once=False, reverse=False):
         pygame.sprite.Sprite.__init__(self)
+        self.name = name
         if frames == 0:
             SpriteSheet.__init__(self, name, path)
         else:
@@ -76,6 +78,9 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
         self.offsetX = self.offsetY = 0
         self.pointTo(offset)
 
+    def __repr__(self):
+        return f"<{self.name}: {self.x}, {self.y}>"
+
     @property
     def x(self):
         return self.rect.x - self.offsetX
@@ -91,6 +96,10 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
     @y.setter
     def y(self, new):
         self.rect.y = new + self.offsetY
+
+    @property
+    def w(self):
+        return self.rect.w
 
     @property
     def h(self):
@@ -153,7 +162,7 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
         self.rect = self.cells[self.currentFrame]
         self.pointTo(self.offset)
 
-    def update(self, x=0, y=0, delay=0):
+    def update(self, delay=0):
         if self.dead:
             pass
         else:
@@ -169,5 +178,31 @@ class Sprites(pygame.sprite.Sprite, SpriteSheet):
 
         self.image = self.images[self.currentFrame]
         self.rect = self.cells[self.currentFrame]
-        self.x = x
-        self.y = y
+
+    def setGlobalPosition(self, x, y):
+        for i in range(self.frames):
+            self.cells[i].x = x + self.offsetX
+            self.cells[i].y = y + self.offsetY
+
+    def updatePosition(self, x, y):
+        self.x = floor(x)
+        self.y = floor(y)
+
+    def updatePositionX(self, x):
+        self.x = floor(x)
+
+    def updatePositionY(self, y):
+        self.y = floor(y)
+
+    def updateDisplacement(self, dx, dy):
+        self.x = floor(self.x + dx)
+        self.y = floor(self.y + dy)
+
+    def updateDisplacementX(self, dx):
+        self.x = floor(self.x + dx)
+
+    def updateDisplacementY(self, dy):
+        self.y = floor(self.y + dy)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
